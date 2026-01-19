@@ -1,0 +1,41 @@
+{
+  "name": "autoon",
+  "version": "0.1.0",
+  "description": "Model class, instance, process and workflow using TOON + JSON Graph - CLI & Web UI",
+  "type": "module",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "autoon": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/cli/index.ts",
+    "dev:web": "cd web && bun run dev",
+    "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target bun",
+    "build:web": "cd web && bun run build",
+    "build": "bun run build:cli && bun run build:web",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@toon-format/toon": "^2.1.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/autoon"
+  },
+  "keywords": [
+    "toon",
+    "json-graph",
+    "workflow",
+    "process",
+    "modeling",
+    "cli",
+    "visualization"
+  ],
+  "license": "MIT"
+}

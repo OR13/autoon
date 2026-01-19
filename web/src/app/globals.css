@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root {
+  --bg-deep: #0a0c10;
+  --bg-surface: #12151c;
+  --bg-elevated: #1a1f2a;
+  --bg-hover: #242b3a;
+  --border: #2a3342;
+  --border-focus: #4a90d9;
+  
+  --text-primary: #e8ecf4;
+  --text-secondary: #8b9cb6;
+  --text-muted: #5a6a84;
+  
+  --accent-cyan: #22d3ee;
+  --accent-cyan-dim: #0e7490;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #f472b6;
+  --accent-violet: #a78bfa;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* LiteGraph overrides */
+.litegraph .litegraph-base {
+  background-color: var(--bg-deep) !important;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
+/* Radial gradient utility */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
+}
