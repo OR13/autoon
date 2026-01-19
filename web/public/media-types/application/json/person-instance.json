@@ -1,0 +1,23 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "age": 30,
+  "email": "john.doe@example.com",
+  "address": {
+    "street": "123 Main St",
+    "city": "San Francisco",
+    "state": "CA",
+    "zipCode": "94102"
+  },
+  "phoneNumbers": [
+    {
+      "type": "home",
+      "number": "415-555-1234"
+    },
+    {
+      "type": "work",
+      "number": "415-555-5678"
+    }
+  ],
+  "isActive": true
+}

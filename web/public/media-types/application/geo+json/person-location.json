@@ -1,0 +1,51 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "sf-office",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.4194, 37.7749]
+      },
+      "properties": {
+        "name": "San Francisco Office",
+        "address": "123 Main St, San Francisco, CA 94102",
+        "type": "headquarters"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "nyc-office",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.006, 40.7128]
+      },
+      "properties": {
+        "name": "New York Office",
+        "address": "456 Broadway, New York, NY 10001",
+        "type": "branch"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "service-area",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-122.5, 37.7],
+            [-122.3, 37.7],
+            [-122.3, 37.85],
+            [-122.5, 37.85],
+            [-122.5, 37.7]
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Bay Area Service Zone",
+        "coverage": "primary"
+      }
+    }
+  ]
+}

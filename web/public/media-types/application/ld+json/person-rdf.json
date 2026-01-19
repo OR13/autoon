@@ -1,0 +1,34 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "firstName": "givenName",
+    "lastName": "familyName"
+  },
+  "@type": "Person",
+  "@id": "https://example.com/persons/john-doe",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "jobTitle": "Software Engineer",
+  "worksFor": {
+    "@type": "Organization",
+    "@id": "https://example.com/orgs/acme",
+    "name": "ACME Corporation",
+    "url": "https://acme.example.com"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Main St",
+    "addressLocality": "San Francisco",
+    "addressRegion": "CA",
+    "postalCode": "94102",
+    "addressCountry": "US"
+  },
+  "knows": [
+    {
+      "@type": "Person",
+      "@id": "https://example.com/persons/jane-smith",
+      "name": "Jane Smith"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://autoon.dev/schemas/json-render.json",
+  "type": "form",
+  "title": "Contact Form",
+  "description": "Get in touch with us",
+  "children": [
+    {
+      "type": "text-input",
+      "name": "firstName",
+      "label": "First Name",
+      "placeholder": "Enter your first name",
+      "required": true
+    },
+    {
+      "type": "text-input",
+      "name": "lastName",
+      "label": "Last Name",
+      "placeholder": "Enter your last name",
+      "required": true
+    },
+    {
+      "type": "text-input",
+      "name": "email",
+      "label": "Email",
+      "placeholder": "you@example.com",
+      "inputType": "email",
+      "required": true
+    },
+    {
+      "type": "select",
+      "name": "subject",
+      "label": "Subject",
+      "options": [
+        { "value": "general", "label": "General Inquiry" },
+        { "value": "support", "label": "Technical Support" },
+        { "value": "sales", "label": "Sales" },
+        { "value": "feedback", "label": "Feedback" }
+      ],
+      "required": true
+    },
+    {
+      "type": "textarea",
+      "name": "message",
+      "label": "Message",
+      "placeholder": "How can we help you?",
+      "rows": 5,
+      "required": true
+    },
+    {
+      "type": "checkbox",
+      "name": "subscribe",
+      "label": "Subscribe to our newsletter",
+      "defaultValue": false
+    },
+    {
+      "type": "button",
+      "label": "Send Message",
+      "action": "submit",
+      "variant": "primary"
+    }
+  ]
+}

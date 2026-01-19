@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { Button, Badge } from 'flowbite-react';
-import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiCollection } from 'react-icons/hi';
-import Link from 'next/link';
+import { Badge } from 'flowbite-react';
+import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiSearch, HiChevronDown } from 'react-icons/hi';
 import {
   EXAMPLES,
   EXAMPLE_CATEGORIES,
@@ -23,24 +22,48 @@ type ViewTab = 'json' | 'visualization' | 'preview';
 function AutoonApp() {
   const [toonContent, setToonContent] = useState('');
   const [jsonContent, setJsonContent] = useState<Record<string, unknown> | null>(null);
-  const [selectedExample, setSelectedExample] = useState<Example>(EXAMPLES[0]);
-  const [selectedCategory, setSelectedCategory] = useState<ExampleCategory>('schema');
-  const [activeTab, setActiveTab] = useState<ViewTab>('visualization');
+  const [selectedExample, setSelectedExample] = useState<Example>(
+    EXAMPLES.find((e) => e.id === 'person-instance') || EXAMPLES[0]
+  );
+  const [activeTab, setActiveTab] = useState<ViewTab>('json');
   const [detectedType, setDetectedType] = useState<ExampleCategory>('schema');
   const [leftPanelWidth, setLeftPanelWidth] = useState(450);
   const [isDragging, setIsDragging] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter examples based on search query
+  const filteredExamples = useMemo(() => {
+    if (!searchQuery.trim()) return EXAMPLES;
+    const query = searchQuery.toLowerCase();
+    return EXAMPLES.filter(
+      (ex) =>
+        ex.name.toLowerCase().includes(query) ||
+        ex.category.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load initial example
   useEffect(() => {
-    loadExample(EXAMPLES[0]);
+    loadExample(EXAMPLES.find((e) => e.id === 'person-instance') || EXAMPLES[0]);
   }, []);
 
   // Update JSON when Toon content changes
   useEffect(() => {
     if (selectedExample) {
-      // For now, we use the pre-defined JSON from examples
-      // In a real implementation, this would parse Toon to JSON
       setJsonContent(selectedExample.json);
       setDetectedType(detectJsonType(selectedExample.json));
     }
@@ -77,20 +100,10 @@ function AutoonApp() {
     setDetectedType(example.category);
   };
 
-  const handleCategoryChange = (category: ExampleCategory) => {
-    setSelectedCategory(category);
-    const categoryExamples = EXAMPLES.filter((e) => e.category === category);
-    if (categoryExamples.length > 0) {
-      loadExample(categoryExamples[0]);
-    }
-  };
-
-  const categoryExamples = EXAMPLES.filter((e) => e.category === selectedCategory);
-
   const renderPreviewContent = () => {
     if (!jsonContent) {
       return (
-        <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="flex items-center justify-center h-full" style={{ color: 'var(--color-text-subtle)' }}>
           No JSON content to display
         </div>
       );
@@ -111,13 +124,13 @@ function AutoonApp() {
         return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
 
       case 'preview':
-        // Show specialized preview based on detected type
         if (detectedType === 'jsonrender') {
           return (
             <JsonRenderPreview
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               json={jsonContent as any}
-              className="h-full bg-gray-900"
+              className="h-full"
+              style={{ backgroundColor: 'var(--color-bg-surface)' }}
             />
           );
         }
@@ -130,14 +143,19 @@ function AutoonApp() {
             />
           );
         }
-        // For schema/instance, show a structured view
         return (
-          <div className="h-full overflow-auto p-4 bg-gray-900">
+          <div className="h-full overflow-auto p-4" style={{ backgroundColor: 'var(--color-bg-surface)' }}>
             <div className="max-w-2xl mx-auto">
-              <h3 className="text-lg font-semibold text-white mb-4">
+              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
                 {detectedType === 'schema' ? 'Schema Structure' : 'Instance Data'}
               </h3>
-              <pre className="text-sm text-gray-300 bg-gray-800 rounded-lg p-4 overflow-auto">
+              <pre 
+                className="text-sm rounded-lg p-4 overflow-auto"
+                style={{ 
+                  color: 'var(--color-text-secondary)',
+                  backgroundColor: 'var(--color-bg-elevated)'
+                }}
+              >
                 {JSON.stringify(jsonContent, null, 2)}
               </pre>
             </div>
@@ -173,101 +191,44 @@ function AutoonApp() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-950 dark" data-theme="dark">
+    <div className="h-screen flex flex-col dark" data-theme="dark" style={{ backgroundColor: 'var(--color-bg-base)' }}>
       {/* Header */}
-      <header className="flex items-center justify-between h-14 px-6 bg-gray-900 border-b border-gray-800">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center font-bold text-gray-900 shadow-lg">
-              A
-            </div>
-            <h1 className="text-lg font-semibold text-yellow-400">Autoon</h1>
-          </div>
-          <Badge color="gray">v0.2</Badge>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Use Case Pages */}
-          <div className="flex items-center gap-1 mr-2">
-            <Link
-              href="/json-schema"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Schema
-            </Link>
-            <Link
-              href="/json-instance"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Instance
-            </Link>
-            <Link
-              href="/json-render"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Render
-            </Link>
-            <Link
-              href="/litegraph"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              LiteGraph
-            </Link>
-          </div>
-
-          <div className="w-px h-6 bg-gray-700" />
-
-          {/* Category selector */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => handleCategoryChange(e.target.value as ExampleCategory)}
-            className="h-8 px-3 text-xs font-medium bg-gray-800 border border-gray-700 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-          >
-            {EXAMPLE_CATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Example selector */}
-          <select
-            value={selectedExample.id}
-            onChange={(e) => {
-              const example = EXAMPLES.find((ex) => ex.id === e.target.value);
-              if (example) loadExample(example);
-            }}
-            className="h-8 px-3 text-xs font-medium bg-gray-800 border border-gray-700 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-          >
-            {categoryExamples.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
-
-          <Button
-            color="gray"
-            size="sm"
-            as="a"
-            href="https://github.com/or13/autoon"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <HiExternalLink className="w-4 h-4 mr-2" />
-            GitHub
-          </Button>
-        </div>
-      </header>
+      <nav className="autoon-header flex items-center justify-between" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+        <a href="/" className="flex items-center gap-3">
+          <svg viewBox="0 0 32 32" className="w-8 h-8">
+            <polygon 
+              points="16,2 28,9 28,23 16,30 4,23 4,9" 
+              fill="#1F2430"
+              stroke="#73D0FF" 
+              strokeWidth="2"
+            />
+            <circle cx="16" cy="2" r="3" fill="#FFAD66"/>
+            <circle cx="28" cy="9" r="3" fill="#FFAD66"/>
+            <circle cx="28" cy="23" r="3" fill="#FFAD66"/>
+            <circle cx="16" cy="30" r="3" fill="#FFAD66"/>
+            <circle cx="4" cy="23" r="3" fill="#FFAD66"/>
+            <circle cx="4" cy="9" r="3" fill="#FFAD66"/>
+          </svg>
+          <span className="text-xl font-semibold" style={{ color: 'var(--color-brand-primary)' }}>
+            Autoon
+          </span>
+          <Badge color="warning">v0.2</Badge>
+        </a>
+        <a
+          href="https://github.com/or13/autoon"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="autoon-btn"
+        >
+          <HiExternalLink className="w-4 h-4 mr-2" />
+          GitHub
+        </a>
+      </nav>
 
       {/* Main content - 2 panels */}
       <main ref={containerRef} className="flex-1 flex overflow-hidden">
         {/* Left Panel - Toon Editor */}
-        <div className="flex flex-col bg-gray-900" style={{ width: leftPanelWidth }}>
-          <div className="flex items-center h-10 px-4 bg-gray-900 border-b border-gray-800">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Toon</span>
-            <span className="ml-2 text-xs text-gray-600">({selectedExample.name})</span>
-          </div>
+        <div className="flex flex-col" style={{ width: leftPanelWidth, backgroundColor: 'var(--color-bg-surface)' }}>
           <div className="flex-1 overflow-hidden">
             <CodeEditor
               value={toonContent}
@@ -280,66 +241,140 @@ function AutoonApp() {
 
         {/* Divider */}
         <div
-          className={`w-1 bg-gray-800 hover:bg-yellow-500 cursor-col-resize transition-colors ${
-            isDragging ? 'bg-yellow-500' : ''
-          }`}
+          className={`autoon-divider ${isDragging ? 'autoon-divider-active' : ''}`}
           onMouseDown={() => setIsDragging(true)}
         />
 
         {/* Right Panel - Tabbed Views */}
-        <div className="flex-1 flex flex-col bg-gray-900">
+        <div className="flex-1 flex flex-col" style={{ backgroundColor: 'var(--color-bg-surface)' }}>
           {/* Tab Bar */}
-          <div className="flex items-center h-10 px-4 bg-gray-900 border-b border-gray-800 gap-1">
+          <div className="autoon-panel-header flex items-center gap-3" style={{ paddingLeft: '16px', paddingRight: '16px' }}>
+            {/* Examples selector */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="autoon-btn"
+                style={{ 
+                  minWidth: '160px',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <span>{selectedExample.name}</span>
+                <HiChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isDropdownOpen && (
+                <div 
+                  className="absolute top-full left-0 mt-2 w-80 rounded-lg shadow-lg z-50 overflow-hidden"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-elevated)', 
+                    border: '1px solid var(--color-border-muted)'
+                  }}
+                >
+                  {/* Search input */}
+                  <div style={{ padding: '12px 12px 8px 12px' }}>
+                    <div 
+                      className="flex items-center gap-3 rounded"
+                      style={{ 
+                        padding: '10px 12px',
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-default)'
+                      }}
+                    >
+                      <HiSearch className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-subtle)' }} />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search examples..."
+                        autoFocus
+                        className="w-full text-sm outline-none bg-transparent"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Results list */}
+                  <div className="max-h-64 overflow-y-auto" style={{ padding: '4px 0 12px 0' }}>
+                    {filteredExamples.length === 0 ? (
+                      <div style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-subtle)', fontSize: '14px' }}>
+                        No examples found
+                      </div>
+                    ) : (
+                      filteredExamples.map((example) => (
+                        <button
+                          key={example.id}
+                          onClick={() => {
+                            loadExample(example);
+                            setIsDropdownOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-left text-sm transition-colors flex items-center justify-between"
+                          style={{ 
+                            padding: '10px 16px',
+                            gap: '16px',
+                            backgroundColor: selectedExample.id === example.id ? 'var(--color-interactive-hover)' : 'transparent',
+                            color: selectedExample.id === example.id ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (selectedExample.id !== example.id) {
+                              e.currentTarget.style.backgroundColor = 'var(--color-bg-muted)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (selectedExample.id !== example.id) {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }
+                          }}
+                        >
+                          <span className="truncate">{example.name}</span>
+                          <span 
+                            className="text-xs font-medium rounded flex-shrink-0"
+                            style={{
+                              padding: '4px 10px',
+                              backgroundColor: 
+                                example.category === 'schema' ? 'rgba(255, 173, 102, 0.1)' :
+                                example.category === 'instance' ? 'rgba(213, 255, 128, 0.1)' :
+                                example.category === 'jsonrender' ? 'rgba(115, 208, 255, 0.1)' : 'rgba(212, 191, 255, 0.1)',
+                              border: `1px solid ${
+                                example.category === 'schema' ? 'rgba(255, 173, 102, 0.3)' :
+                                example.category === 'instance' ? 'rgba(213, 255, 128, 0.3)' :
+                                example.category === 'jsonrender' ? 'rgba(115, 208, 255, 0.3)' : 'rgba(212, 191, 255, 0.3)'
+                              }`,
+                              color: 
+                                example.category === 'schema' ? '#FFAD66' :
+                                example.category === 'instance' ? '#D5FF80' :
+                                example.category === 'jsonrender' ? '#73D0FF' : '#D4BFFF'
+                            }}
+                          >
+                            {example.category === 'schema' ? 'Data Validation' :
+                             example.category === 'instance' ? 'Data Representation' :
+                             example.category === 'jsonrender' ? 'Interface Definition' : 'Workflow Representation'}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--color-border-muted)' }} />
+
             <button
               onClick={() => setActiveTab('json')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'json'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
+              className={`autoon-tab ${activeTab === 'json' ? 'autoon-tab-active' : ''}`}
             >
               {getTabIcon('json')}
               JSON
             </button>
             <button
               onClick={() => setActiveTab('visualization')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'visualization'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
+              className={`autoon-tab ${activeTab === 'visualization' ? 'autoon-tab-active' : ''}`}
             >
               {getTabIcon('visualization')}
               Visualize
             </button>
-            <button
-              onClick={() => setActiveTab('preview')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'preview'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
-            >
-              {getTabIcon('preview')}
-              {getPreviewLabel()}
-            </button>
-
-            {/* Type indicator */}
-            <div className="ml-auto">
-              <Badge
-                color={
-                  detectedType === 'litegraph'
-                    ? 'purple'
-                    : detectedType === 'jsonrender'
-                    ? 'blue'
-                    : detectedType === 'schema'
-                    ? 'yellow'
-                    : 'green'
-                }
-              >
-                {EXAMPLE_CATEGORIES.find((c) => c.id === detectedType)?.name || detectedType}
-              </Badge>
-            </div>
           </div>
 
           {/* Tab Content */}
@@ -354,7 +389,10 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="h-screen flex items-center justify-center bg-gray-950 text-gray-400">
+        <div 
+          className="h-screen flex items-center justify-center"
+          style={{ backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-muted)' }}
+        >
           Loading...
         </div>
       }

@@ -1,6 +1,84 @@
 @import "tailwindcss";
 @plugin "flowbite/plugin";
 
+/* ========================================
+   AUTOON THEME - Ayu Mirage
+   Based on https://github.com/ayu-theme/ayu-colors
+   ======================================== */
+
+:root {
+  color-scheme: dark;
+  
+  /* Ayu Mirage - Background Colors */
+  --color-bg-base: #1F2430;            /* editor background */
+  --color-bg-surface: #232834;         /* panel background */
+  --color-bg-elevated: #2D3441;        /* elevated surfaces */
+  --color-bg-muted: #3D4455;           /* muted backgrounds */
+  
+  /* Ayu Mirage - Border Colors */
+  --color-border-default: #2D3441;     /* default borders */
+  --color-border-muted: #3D4455;       /* muted borders */
+  --color-border-subtle: #4D5566;      /* subtle borders */
+  
+  /* Ayu Mirage - Text Colors */
+  --color-text-primary: #CBCCC6;       /* primary text */
+  --color-text-secondary: #B8B4A8;     /* secondary text */
+  --color-text-muted: #707A8C;         /* muted text */
+  --color-text-subtle: #5C6773;        /* subtle text */
+  
+  /* Ayu Mirage - Accent Colors (Syntax) */
+  --color-accent-orange: #FFAD66;      /* strings, constants */
+  --color-accent-yellow: #FFD173;      /* functions */
+  --color-accent-green: #D5FF80;       /* strings */
+  --color-accent-cyan: #95E6CB;        /* regex, escape */
+  --color-accent-blue: #73D0FF;        /* tags, keywords */
+  --color-accent-purple: #D4BFFF;      /* special */
+  --color-accent-pink: #F28779;        /* markup */
+  --color-accent-red: #FF6666;         /* errors */
+  
+  /* Brand Colors - Using Ayu Mirage accents */
+  --color-brand-primary: #FFAD66;      /* orange - primary brand */
+  --color-brand-secondary: #73D0FF;    /* blue - secondary */
+  --color-brand-accent: #FFD173;       /* yellow - accent */
+  
+  /* Interactive Colors */
+  --color-interactive-hover: #2D3441;  /* hover state */
+  --color-interactive-active: #3D4455; /* active state */
+  
+  /* Status Colors */
+  --color-success: #D5FF80;            /* green */
+  --color-warning: #FFD173;            /* yellow */
+  --color-error: #FF6666;              /* red */
+  --color-info: #73D0FF;               /* blue */
+  
+  /* Spacing */
+  --header-height: 3.5rem;             /* 56px */
+  --panel-header-height: 2.5rem;       /* 40px */
+}
+
+/* ========================================
+   FLOWBITE THEME - Ayu Mirage Orange
+   ======================================== */
+
+@theme {
+  /* Primary - Orange (Ayu Mirage accent) */
+  --color-primary-50: #FFF8F0;
+  --color-primary-100: #FFEFD9;
+  --color-primary-200: #FFDDB3;
+  --color-primary-300: #FFCB8C;
+  --color-primary-400: #FFBC73;
+  --color-primary-500: #FFAD66;
+  --color-primary-600: #E69A5C;
+  --color-primary-700: #CC8752;
+  --color-primary-800: #B37447;
+  --color-primary-900: #99613D;
+  --color-primary-950: #664129;
+}
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -14,32 +92,112 @@ html, body {
 
 body {
   font-family: 'Outfit', system-ui, sans-serif;
-  @apply bg-gray-950 text-gray-100;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
 }
 
-:root {
-  color-scheme: dark;
+/* ========================================
+   COMPONENT STYLES
+   ======================================== */
+
+/* Header */
+.autoon-header {
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  height: var(--header-height);
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
-/* Scrollbar */
+/* Panel Header */
+.autoon-panel-header {
+  background-color: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border-default);
+  height: var(--panel-header-height);
+}
+
+/* Button styles */
+.autoon-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-muted);
+  border-radius: 0.5rem;
+  transition: all 150ms ease;
+}
+
+.autoon-btn:hover {
+  background-color: var(--color-interactive-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-brand-primary);
+}
+
+/* Tab styles */
+.autoon-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  border-radius: 0.25rem;
+  transition: all 150ms ease;
+}
+
+.autoon-tab:hover {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-elevated);
+}
+
+.autoon-tab-active {
+  color: var(--color-brand-primary);
+  background-color: var(--color-interactive-hover);
+}
+
+/* Divider */
+.autoon-divider {
+  width: 4px;
+  background-color: var(--color-border-default);
+  cursor: col-resize;
+  transition: background-color 150ms ease;
+}
+
+.autoon-divider:hover,
+.autoon-divider-active {
+  background-color: var(--color-brand-primary);
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-950;
+  background-color: var(--color-bg-base);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-700 rounded;
+  background-color: var(--color-border-muted);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-600;
+  background-color: var(--color-border-subtle);
 }
 
-/* Animation */
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

@@ -13,31 +13,22 @@ export interface Example {
 // JSON Schema Examples
 // ============================================
 
-const personSchemaToon = `graph{id,type,label}:
-  person-schema,schema,Person Schema
+// TOON format: direct representation of the JSON Schema
+const personSchemaToon = `schema{$id,$schema,title,type,additionalProperties}:
+  https://example.com/person.schema.json,https://json-schema.org/draft/2020-12/schema,Person,object,false
 
-nodes[8]{id,label,type,dataType,constraints}:
-  root,Person,object,,
-  firstName,firstName,property,string,
-  lastName,lastName,property,string,
-  age,age,property,integer,minimum:0
-  email,email,property,string,format:email
-  phone,phone,property,string,pattern:^\\+?[0-9]{10,14}$
-  address,address,property,object,
-  isActive,isActive,property,boolean,default:true
+properties[7]{name,type,description,minimum,format,pattern,default}:
+  firstName,string,The person's first name.,,,,
+  lastName,string,The person's last name.,,,,
+  age,integer,Age in years which must be equal to or greater than zero.,0,,,
+  email,string,,,,email,,
+  phone,string,,,,^\\+?[0-9]{10,14}$,
+  address,object,,,,,
+  isActive,boolean,,,,,,true
 
-edges[7]{source,target,relation}:
-  root,firstName,has_property
-  root,lastName,has_property
-  root,age,has_property
-  root,email,has_property
-  root,phone,has_property
-  root,address,has_property
-  root,isActive,has_property
-
-metadata:
-  required: firstName,lastName
-  additionalProperties: false`;
+required[2]:
+  firstName
+  lastName`;
 
 const personSchemaJson = {
   $id: 'https://example.com/person.schema.json',
@@ -78,28 +69,21 @@ const personSchemaJson = {
   additionalProperties: false,
 };
 
-const productSchemaToon = `graph{id,type,label}:
-  product-schema,schema,Product Schema
+const productSchemaToon = `schema{$id,$schema,title,type}:
+  https://example.com/product.schema.json,https://json-schema.org/draft/2020-12/schema,Product,object
 
-nodes[7]{id,label,type,dataType,constraints}:
-  root,Product,object,,
-  id,id,property,string,format:uuid
-  name,name,property,string,minLength:1
-  price,price,property,number,minimum:0
-  category,category,property,string,enum:electronics|clothing|food|other
-  inStock,inStock,property,boolean,default:true
-  tags,tags,property,array,items:string|uniqueItems:true
+properties[6]{name,type,format,minLength,minimum,enum,default,uniqueItems}:
+  id,string,uuid,,,,,
+  name,string,,1,,,,
+  price,number,,,0,,,
+  category,string,,,,electronics|clothing|food|other,,
+  inStock,boolean,,,,,true,
+  tags,array,,,,,,true
 
-edges[6]{source,target,relation}:
-  root,id,has_property
-  root,name,has_property
-  root,price,has_property
-  root,category,has_property
-  root,inStock,has_property
-  root,tags,has_property
-
-metadata:
-  required: id,name,price`;
+required[3]:
+  id
+  name
+  price`;
 
 const productSchemaJson = {
   $id: 'https://example.com/product.schema.json',
@@ -140,15 +124,8 @@ const productSchemaJson = {
 // JSON Instance Examples
 // ============================================
 
-const personInstanceToon = `graph{id,type,label}:
-  person-instance,instance,John Doe
-
-nodes[5]{id,label,value}:
-  firstName,firstName,John
-  lastName,lastName,Doe
-  age,age,30
-  email,email,john.doe@example.com
-  isActive,isActive,true`;
+const personInstanceToon = `person{firstName,lastName,age,email,isActive}:
+  John,Doe,30,john.doe@example.com,true`;
 
 const personInstanceJson = {
   firstName: 'John',
@@ -158,16 +135,8 @@ const personInstanceJson = {
   isActive: true,
 };
 
-const productInstanceToon = `graph{id,type,label}:
-  product-instance,instance,Wireless Headphones
-
-nodes[6]{id,label,value}:
-  id,id,550e8400-e29b-41d4-a716-446655440000
-  name,name,Wireless Headphones
-  price,price,79.99
-  category,category,electronics
-  inStock,inStock,true
-  tags,tags,["audio","wireless","bluetooth"]`;
+const productInstanceToon = `product{id,name,price,category,inStock,tags}:
+  550e8400-e29b-41d4-a716-446655440000,Wireless Headphones,79.99,electronics,true,["audio","wireless","bluetooth"]`;
 
 const productInstanceJson = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -182,21 +151,13 @@ const productInstanceJson = {
 // JSON Render Examples (Vercel AI UI Components)
 // ============================================
 
-const dashboardRenderToon = `graph{id,type,label}:
-  dashboard,jsonrender,Revenue Dashboard
+const dashboardRenderToon = `component{type,title}:
+  Card,Revenue Dashboard
 
-nodes[6]{id,type,props,children}:
-  card1,Card,{"title":"Revenue Dashboard"},metric1|metric2|chart1
-  metric1,Metric,{"label":"Total Revenue","value":"$125,430","trend":"+12.5%"},
-  metric2,Metric,{"label":"Active Users","value":"2,847","trend":"+5.2%"},
-  chart1,BarChart,{"data":[{"month":"Jan","value":4000},{"month":"Feb","value":3000},{"month":"Mar","value":5000}]},
-  alert1,Alert,{"variant":"success","message":"Q1 targets exceeded by 15%"},
-  button1,Button,{"label":"View Details","action":{"name":"navigate","params":{"to":"/reports"}}}
-
-edges[3]{source,target,relation}:
-  card1,metric1,contains
-  card1,metric2,contains
-  card1,chart1,contains`;
+children[3]{type,label,value,trend,data}:
+  Metric,Total Revenue,$125430,+12.5%,
+  Metric,Active Users,2847,+5.2%,
+  BarChart,,,,{"data":[{"month":"Jan","value":4000},{"month":"Feb","value":3000},{"month":"Mar","value":5000}]}`;
 
 const dashboardRenderJson = {
   type: 'Card',
@@ -223,25 +184,16 @@ const dashboardRenderJson = {
   ],
 };
 
-const formRenderToon = `graph{id,type,label}:
-  contact-form,jsonrender,Contact Form
+const formRenderToon = `component{type,title,action}:
+  Form,Contact Us,submit-contact
 
-nodes[7]{id,type,props}:
-  form1,Form,{"title":"Contact Us","action":"submit-contact"}
-  input1,TextInput,{"name":"name","label":"Full Name","required":true}
-  input2,TextInput,{"name":"email","label":"Email","type":"email","required":true}
-  input3,TextArea,{"name":"message","label":"Message","rows":4}
-  select1,Select,{"name":"subject","label":"Subject","options":["General","Support","Sales"]}
-  checkbox1,Checkbox,{"name":"subscribe","label":"Subscribe to newsletter"}
-  submit1,Button,{"label":"Send Message","type":"submit","variant":"primary"}
-
-edges[6]{source,target,relation}:
-  form1,input1,contains
-  form1,input2,contains
-  form1,select1,contains
-  form1,input3,contains
-  form1,checkbox1,contains
-  form1,submit1,contains`;
+children[6]{type,name,label,required,type2,rows,options,variant}:
+  TextInput,name,Full Name,true,,,,
+  TextInput,email,Email,true,email,,,
+  Select,subject,Subject,,,,"General|Support|Sales",
+  TextArea,message,Message,,,4,,
+  Checkbox,subscribe,Subscribe to newsletter,,,,,
+  Button,,,,,,,primary`;
 
 const formRenderJson = {
   type: 'Form',
@@ -282,8 +234,8 @@ const formRenderJson = {
 // LiteGraph/ComfyUI Examples
 // ============================================
 
-const simpleWorkflowToon = `graph{id,type,label,version}:
-  simple-workflow,litegraph,Simple Image Generation,1
+const simpleWorkflowToon = `workflow{version,lastNodeId,lastLinkId}:
+  1,4,4
 
 nodes[4]{id,type,pos_x,pos_y,widgets_values}:
   1,CheckpointLoaderSimple,50,200,["v1-5-pruned.safetensors"]
@@ -291,12 +243,12 @@ nodes[4]{id,type,pos_x,pos_y,widgets_values}:
   3,CLIPTextEncode,300,300,["blurry, bad quality"]
   4,KSampler,550,200,["euler",20,8,1234]
 
-edges[4]{source,source_slot,target,target_slot}:
-  1,0,4,0
-  1,1,2,0
-  1,1,3,0
-  2,0,4,1
-  3,0,4,2`;
+links[5]{id,origin_id,origin_slot,target_id,target_slot,type}:
+  1,1,0,4,0,MODEL
+  2,1,1,2,0,CLIP
+  3,1,1,3,0,CLIP
+  4,2,0,4,1,CONDITIONING
+  5,3,0,4,2,CONDITIONING`;
 
 const simpleWorkflowJson = {
   version: 1,
@@ -366,8 +318,8 @@ const simpleWorkflowJson = {
   ],
 };
 
-const img2imgWorkflowToon = `graph{id,type,label,version}:
-  img2img-workflow,litegraph,Image to Image,1
+const img2imgWorkflowToon = `workflow{version,lastNodeId,lastLinkId}:
+  1,6,8
 
 nodes[6]{id,type,pos_x,pos_y,widgets_values}:
   1,LoadImage,50,150,["input.png"]
@@ -377,15 +329,15 @@ nodes[6]{id,type,pos_x,pos_y,widgets_values}:
   5,KSampler,550,200,["euler",20,7,42,0.75]
   6,VAEDecode,800,200,[]
 
-edges[6]{source,source_slot,target,target_slot}:
-  1,0,3,0
-  2,0,5,0
-  2,1,4,0
-  2,2,3,1
-  3,0,5,3
-  4,0,5,1
-  5,0,6,0
-  2,2,6,1`;
+links[8]{id,origin_id,origin_slot,target_id,target_slot,type}:
+  1,1,0,3,0,IMAGE
+  2,2,0,5,0,MODEL
+  3,2,1,4,0,CLIP
+  4,2,2,3,1,VAE
+  5,3,0,5,3,LATENT
+  6,4,0,5,1,CONDITIONING
+  7,5,0,6,0,LATENT
+  8,2,2,6,1,VAE`;
 
 const img2imgWorkflowJson = {
   version: 1,
@@ -581,132 +533,4 @@ export function detectJsonType(json: Record<string, unknown>): ExampleCategory {
 
   // Default to instance
   return 'instance';
-}
-
-// ============================================
-// Legacy exports for backward compatibility
-// ============================================
-
-export const SCHEMA_EXAMPLES = {
-  person: personSchemaJson,
-  product: productSchemaJson,
-  address: {
-    $id: 'https://example.com/address.schema.json',
-    $schema: 'https://json-schema.org/draft/2020-12/schema',
-    title: 'Address',
-    type: 'object',
-    properties: {
-      street: { type: 'string' },
-      city: { type: 'string' },
-      state: { type: 'string', minLength: 2, maxLength: 2 },
-      zipCode: { type: 'string', pattern: '^[0-9]{5}(-[0-9]{4})?$' },
-      country: { type: 'string', default: 'USA' },
-    },
-    required: ['street', 'city', 'state', 'zipCode'],
-  },
-};
-
-export const INSTANCE_EXAMPLES = {
-  person: personInstanceJson,
-  product: productInstanceJson,
-  address: {
-    street: '123 Main Street',
-    city: 'Springfield',
-    state: 'IL',
-    zipCode: '62701',
-    country: 'USA',
-  },
-};
-
-// Graph representation of schema structure
-export interface SchemaGraphNode {
-  id: string;
-  label: string;
-  type: 'object' | 'property' | 'type' | 'constraint';
-  data?: Record<string, unknown>;
-}
-
-export interface SchemaGraphEdge {
-  source: string;
-  target: string;
-  relation: 'has_property' | 'has_type' | 'has_constraint';
-  label?: string;
-}
-
-export interface SchemaGraph {
-  nodes: Record<string, SchemaGraphNode>;
-  edges: SchemaGraphEdge[];
-}
-
-// Convert JSON Schema to graph representation
-export function schemaToGraph(schema: Record<string, unknown>): SchemaGraph {
-  const graph: SchemaGraph = { nodes: {}, edges: [] };
-  let nodeId = 0;
-
-  const rootId = `node_${nodeId++}`;
-  graph.nodes[rootId] = {
-    id: rootId,
-    label: (schema.title as string) || 'Root',
-    type: 'object',
-  };
-
-  const properties = schema.properties as Record<string, Record<string, unknown>> | undefined;
-  if (properties) {
-    for (const [propName, propSchema] of Object.entries(properties)) {
-      const propId = `node_${nodeId++}`;
-      graph.nodes[propId] = {
-        id: propId,
-        label: propName,
-        type: 'property',
-        data: propSchema,
-      };
-      graph.edges.push({
-        source: rootId,
-        target: propId,
-        relation: 'has_property',
-      });
-
-      // Add type node
-      const typeValue = propSchema.type as string | undefined;
-      if (typeValue) {
-        const typeId = `node_${nodeId++}`;
-        graph.nodes[typeId] = {
-          id: typeId,
-          label: typeValue,
-          type: 'type',
-        };
-        graph.edges.push({
-          source: propId,
-          target: typeId,
-          relation: 'has_type',
-        });
-      }
-
-      // Add constraints
-      const constraints: string[] = [];
-      if (propSchema.minimum !== undefined) constraints.push(`min: ${propSchema.minimum}`);
-      if (propSchema.maximum !== undefined) constraints.push(`max: ${propSchema.maximum}`);
-      if (propSchema.minLength !== undefined) constraints.push(`minLen: ${propSchema.minLength}`);
-      if (propSchema.maxLength !== undefined) constraints.push(`maxLen: ${propSchema.maxLength}`);
-      if (propSchema.pattern) constraints.push(`pattern`);
-      if (propSchema.format) constraints.push(`format: ${propSchema.format}`);
-      if (propSchema.enum) constraints.push(`enum`);
-
-      if (constraints.length > 0) {
-        const constraintId = `node_${nodeId++}`;
-        graph.nodes[constraintId] = {
-          id: constraintId,
-          label: constraints.join(', '),
-          type: 'constraint',
-        };
-        graph.edges.push({
-          source: propId,
-          target: constraintId,
-          relation: 'has_constraint',
-        });
-      }
-    }
-  }
-
-  return graph;
 }
