@@ -1,66 +1,47 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { AutoonDocument, NodeType } from '@/types/autoon';
+import { Button } from 'flowbite-react';
+import { HiViewGrid, HiArrowsExpand } from 'react-icons/hi';
+import { SchemaGraph } from '@/lib/examples';
 
 // Node colors by type
 const NODE_COLORS: Record<string, string> = {
-  class: '#3b82f6',
-  attribute: '#f59e0b',
-  method: '#a78bfa',
-  instance: '#10b981',
-  state: '#f472b6',
-  action: '#22d3ee',
-  decision: '#fbbf24',
-  start: '#34d399',
-  end: '#f87171',
-  fork: '#6b7280',
-  join: '#6b7280',
+  object: '#eab308',      // yellow-500
+  property: '#22c55e',    // green-500
+  type: '#3b82f6',        // blue-500
+  constraint: '#f97316',  // orange-500
 };
 
 const NODE_BG_COLORS: Record<string, string> = {
-  class: '#1e3a5f',
-  attribute: '#4a3520',
-  method: '#3d2d5a',
-  instance: '#1a3d30',
-  state: '#4a2040',
-  action: '#1a3d40',
-  decision: '#4a3d10',
-  start: '#1a3d25',
-  end: '#4a2020',
-  fork: '#2a2a2a',
-  join: '#2a2a2a',
+  object: '#422006',      // yellow-950
+  property: '#052e16',    // green-950
+  type: '#172554',        // blue-950
+  constraint: '#431407',  // orange-950
 };
 
 interface GraphEditorProps {
-  document: AutoonDocument | null;
-  onSync?: (doc: AutoonDocument) => void;
+  graph: SchemaGraph | null;
   className?: string;
 }
 
-export default function GraphEditor({ document, onSync, className }: GraphEditorProps) {
+export default function GraphEditor({ graph, className }: GraphEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const graphRef = useRef<InstanceType<typeof import('litegraph.js').LGraph> | null>(null);
   const graphCanvasRef = useRef<InstanceType<typeof import('litegraph.js').LGraphCanvas> | null>(null);
-  const nodeIdMapRef = useRef<Record<string, number>>({});
-  const isUpdatingRef = useRef(false);
   const LiteGraphRef = useRef<typeof import('litegraph.js') | null>(null);
 
   const registerNodeTypes = useCallback(() => {
     const LiteGraph = LiteGraphRef.current;
     if (!LiteGraph) return;
 
-    const nodeTypes: NodeType[] = [
-      'class', 'attribute', 'method', 'instance', 'state',
-      'action', 'decision', 'start', 'end', 'fork', 'join',
-    ];
+    const nodeTypes = ['object', 'property', 'type', 'constraint'];
 
     nodeTypes.forEach((type) => {
-      // Check if already registered
-      if (LiteGraph.LiteGraph.registered_node_types[`autoon/${type}`]) return;
+      if (LiteGraph.LiteGraph.registered_node_types[`schema/${type}`]) return;
 
-      class AutoonNode extends LiteGraph.LGraphNode {
+      class SchemaNode extends LiteGraph.LGraphNode {
         static title = type.charAt(0).toUpperCase() + type.slice(1);
         static desc = `${type} node`;
 
@@ -69,45 +50,37 @@ export default function GraphEditor({ document, onSync, className }: GraphEditor
           this.title = type.charAt(0).toUpperCase() + type.slice(1);
           this.addOutput('out', 'flow');
           this.addInput('in', 'flow');
-          this.properties = {
-            nodeId: '',
-            nodeType: type,
-            label: 'Node',
-          };
-          this.size = [180, 60];
+          this.properties = { nodeId: '', nodeType: type, label: 'Node' };
+          this.size = [160, 50];
           this.color = NODE_COLORS[type];
           this.bgcolor = NODE_BG_COLORS[type];
 
-          if (type === 'decision') {
-            this.addOutput('yes', 'flow');
-            this.addOutput('no', 'flow');
-            this.size = [140, 80];
-          } else if (type === 'start') {
+          if (type === 'object') {
+            this.size = [180, 60];
             this.inputs = [];
-            this.size = [120, 50];
-          } else if (type === 'end') {
+          } else if (type === 'constraint') {
+            this.size = [200, 40];
             this.outputs = [];
-            this.size = [120, 50];
-          } else if (type === 'fork') {
-            this.addOutput('out2', 'flow');
-            this.size = [100, 60];
-          } else if (type === 'join') {
-            this.addInput('in2', 'flow');
-            this.size = [100, 60];
-          } else if (type === 'attribute' || type === 'method') {
-            this.size = [160, 50];
+          } else if (type === 'type') {
+            this.size = [100, 40];
+            this.outputs = [];
           }
         }
 
         onDrawForeground(ctx: CanvasRenderingContext2D) {
-          ctx.font = '12px Outfit, sans-serif';
-          ctx.fillStyle = '#e8ecf4';
+          ctx.font = 'bold 12px Outfit, sans-serif';
+          ctx.fillStyle = '#ffffff';
           ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 3;
           ctx.fillText(
             (this.properties as { label: string }).label || this.title,
             this.size[0] / 2,
             this.size[1] / 2 + 4
           );
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
         }
 
         getTitle() {
@@ -115,153 +88,95 @@ export default function GraphEditor({ document, onSync, className }: GraphEditor
         }
       }
 
-      LiteGraph.LiteGraph.registerNodeType(`autoon/${type}`, AutoonNode);
+      LiteGraph.LiteGraph.registerNodeType(`schema/${type}`, SchemaNode);
     });
   }, []);
 
-  const loadDocToGraph = useCallback((doc: AutoonDocument) => {
+  const loadGraphData = useCallback((schemaGraph: SchemaGraph) => {
     const LiteGraph = LiteGraphRef.current;
-    const graph = graphRef.current;
+    const lgGraph = graphRef.current;
     const graphCanvas = graphCanvasRef.current;
 
-    if (!LiteGraph || !graph || !graphCanvas || !doc) return;
+    if (!LiteGraph || !lgGraph || !graphCanvas || !schemaGraph) return;
 
-    isUpdatingRef.current = true;
-    graph.clear();
-    nodeIdMapRef.current = {};
+    lgGraph.clear();
+    const nodeIdMap: Record<string, number> = {};
 
-    const g = doc.graph || (doc.graphs && doc.graphs[0]);
-    if (!g || !g.nodes) {
-      isUpdatingRef.current = false;
-      return;
-    }
-
-    const nodes = Object.entries(g.nodes);
-    const edges = g.edges || [];
-    const cols = Math.ceil(Math.sqrt(nodes.length));
-    const spacingX = 220;
-    const spacingY = 120;
-    const offsetX = 100;
-    const offsetY = 80;
-
-    nodes.forEach(([id, nodeData], i) => {
-      const nodeType = nodeData.type || 'class';
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-
+    // Layout: root at left, properties in column, types/constraints to right
+    const nodes = Object.entries(schemaGraph.nodes);
+    let propY = 80;
+    
+    nodes.forEach(([id, nodeData]) => {
+      const nodeType = nodeData.type || 'property';
+      
       let lgNode;
       try {
-        lgNode = LiteGraph.LiteGraph.createNode(`autoon/${nodeType}`);
+        lgNode = LiteGraph.LiteGraph.createNode(`schema/${nodeType}`);
       } catch {
-        lgNode = LiteGraph.LiteGraph.createNode('autoon/class');
+        lgNode = LiteGraph.LiteGraph.createNode('schema/property');
       }
 
       if (lgNode) {
-        lgNode.pos = [offsetX + col * spacingX, offsetY + row * spacingY];
-        lgNode.properties = {
-          nodeId: id,
-          label: nodeData.label || id,
-          nodeType: nodeType,
-        };
-        lgNode.title = nodeData.label || id;
-        graph.add(lgNode);
-        nodeIdMapRef.current[id] = lgNode.id;
+        // Position based on type
+        if (nodeType === 'object') {
+          lgNode.pos = [50, 200];
+        } else if (nodeType === 'property') {
+          lgNode.pos = [280, propY];
+          propY += 80;
+        } else if (nodeType === 'type') {
+          // Find connected property to position relative to it
+          const edge = schemaGraph.edges.find(e => e.target === id);
+          if (edge && nodeIdMap[edge.source] !== undefined) {
+            const sourceNode = lgGraph.getNodeById(nodeIdMap[edge.source]);
+            if (sourceNode) {
+              lgNode.pos = [sourceNode.pos[0] + 200, sourceNode.pos[1] - 20];
+            } else {
+              lgNode.pos = [500, propY - 60];
+            }
+          } else {
+            lgNode.pos = [500, propY - 60];
+          }
+        } else if (nodeType === 'constraint') {
+          const edge = schemaGraph.edges.find(e => e.target === id);
+          if (edge && nodeIdMap[edge.source] !== undefined) {
+            const sourceNode = lgGraph.getNodeById(nodeIdMap[edge.source]);
+            if (sourceNode) {
+              lgNode.pos = [sourceNode.pos[0] + 200, sourceNode.pos[1] + 20];
+            } else {
+              lgNode.pos = [500, propY - 40];
+            }
+          } else {
+            lgNode.pos = [500, propY - 40];
+          }
+        }
+
+        lgNode.properties = { nodeId: id, label: nodeData.label, nodeType };
+        lgNode.title = nodeData.label;
+        lgGraph.add(lgNode);
+        nodeIdMap[id] = lgNode.id;
       }
     });
 
-    edges.forEach((edge) => {
-      const sourceId = nodeIdMapRef.current[edge.source];
-      const targetId = nodeIdMapRef.current[edge.target];
+    // Add edges
+    schemaGraph.edges.forEach((edge) => {
+      const sourceId = nodeIdMap[edge.source];
+      const targetId = nodeIdMap[edge.target];
 
       if (sourceId !== undefined && targetId !== undefined) {
-        const sourceNode = graph.getNodeById(sourceId);
-        const targetNode = graph.getNodeById(targetId);
+        const sourceNode = lgGraph.getNodeById(sourceId);
+        const targetNode = lgGraph.getNodeById(targetId);
 
-        if (sourceNode && targetNode) {
-          let outputSlot = 0;
-          let inputSlot = 0;
-
-          if (sourceNode.outputs) {
-            for (let i = 0; i < sourceNode.outputs.length; i++) {
-              if (sourceNode.outputs[i].name === 'out') {
-                outputSlot = i;
-                break;
-              }
-            }
-          }
-
-          if (targetNode.inputs) {
-            for (let i = 0; i < targetNode.inputs.length; i++) {
-              if (targetNode.inputs[i].name === 'in') {
-                inputSlot = i;
-                break;
-              }
-            }
-          }
-
-          sourceNode.connect(outputSlot, targetNode, inputSlot);
+        if (sourceNode && targetNode && sourceNode.outputs && targetNode.inputs) {
+          sourceNode.connect(0, targetNode, 0);
         }
       }
     });
 
-    isUpdatingRef.current = false;
     graphCanvas.setDirty(true, true);
   }, []);
 
-  const syncToText = useCallback(() => {
-    const graph = graphRef.current;
-    if (!graph || !onSync) return;
-
-    // Use type assertion to access internal properties
-    type GraphNode = {
-      id: number;
-      title: string;
-      properties: Record<string, unknown>;
-    };
-    const nodes = (graph as unknown as { _nodes: GraphNode[] })._nodes || [];
-    const links = graph.links || {};
-
-    const doc: AutoonDocument = {
-      graph: {
-        id: 'untitled',
-        type: 'class',
-        label: '',
-        directed: true,
-        nodes: {},
-        edges: [],
-      },
-    };
-
-    const lgNodeIdToAutoonId: Record<number, string> = {};
-    nodes.forEach((node) => {
-      const autoonId = (node.properties as { nodeId?: string }).nodeId || `node_${node.id}`;
-      lgNodeIdToAutoonId[node.id] = autoonId;
-      doc.graph!.nodes[autoonId] = {
-        label: (node.properties as { label?: string }).label || node.title,
-        type: (node.properties as { nodeType?: NodeType }).nodeType || 'class',
-      };
-    });
-
-    Object.values(links).forEach((link) => {
-      if (!link) return;
-      const sourceId = lgNodeIdToAutoonId[link.origin_id];
-      const targetId = lgNodeIdToAutoonId[link.target_id];
-      if (sourceId && targetId) {
-        doc.graph!.edges!.push({
-          source: sourceId,
-          target: targetId,
-          relation: 'flows',
-        });
-      }
-    });
-
-    onSync(doc);
-  }, [onSync]);
-
-  // Initialize LiteGraph
   useEffect(() => {
     const initLiteGraph = async () => {
-      // Dynamic import for client-side only
       const LiteGraph = await import('litegraph.js');
       LiteGraphRef.current = LiteGraph;
 
@@ -269,21 +184,20 @@ export default function GraphEditor({ document, onSync, className }: GraphEditor
 
       registerNodeTypes();
 
-      const graph = new LiteGraph.LGraph();
-      graphRef.current = graph;
+      const lgGraph = new LiteGraph.LGraph();
+      graphRef.current = lgGraph;
 
-      const graphCanvas = new LiteGraph.LGraphCanvas(canvasRef.current, graph);
+      const graphCanvas = new LiteGraph.LGraphCanvas(canvasRef.current, lgGraph);
       graphCanvasRef.current = graphCanvas;
 
-      // LiteGraph types are incomplete, use any for customization
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gc = graphCanvas as any;
       gc.background_image = null;
-      gc.clear_background_color = '#0a0c10';
+      gc.clear_background_color = '#030712';
       gc.render_shadows = false;
       gc.render_curved_connections = true;
       gc.connections_width = 2;
-      gc.default_link_color = '#5a6a84';
+      gc.default_link_color = '#6b7280';
 
       const resizeCanvas = () => {
         if (canvasRef.current && containerRef.current) {
@@ -295,29 +209,26 @@ export default function GraphEditor({ document, onSync, className }: GraphEditor
 
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
+      lgGraph.start();
 
-      graph.start();
-
-      // Load initial document if available
-      if (document) {
-        loadDocToGraph(document);
+      if (graph) {
+        loadGraphData(graph);
       }
 
       return () => {
         window.removeEventListener('resize', resizeCanvas);
-        graph.stop();
+        lgGraph.stop();
       };
     };
 
     initLiteGraph();
-  }, [registerNodeTypes, loadDocToGraph, document]);
+  }, [registerNodeTypes, loadGraphData, graph]);
 
-  // Update graph when document changes
   useEffect(() => {
-    if (document && graphRef.current && !isUpdatingRef.current) {
-      loadDocToGraph(document);
+    if (graph && graphRef.current) {
+      loadGraphData(graph);
     }
-  }, [document, loadDocToGraph]);
+  }, [graph, loadGraphData]);
 
   const handleFitView = () => {
     if (graphCanvasRef.current) {
@@ -327,41 +238,24 @@ export default function GraphEditor({ document, onSync, className }: GraphEditor
   };
 
   const handleArrange = () => {
-    const graph = graphRef.current;
-    if (!graph) return;
-
-    const nodes = (graph as unknown as { _nodes: { pos: number[] }[] })._nodes || [];
-    const cols = Math.ceil(Math.sqrt(nodes.length));
-
-    nodes.forEach((node, i) => {
-      node.pos[0] = 100 + (i % cols) * 220;
-      node.pos[1] = 80 + Math.floor(i / cols) * 120;
-    });
-
-    graphCanvasRef.current?.setDirty(true, true);
+    const lgGraph = graphRef.current;
+    if (!lgGraph || !graph) return;
+    
+    // Re-layout
+    loadGraphData(graph);
   };
 
   return (
     <div className={`flex flex-col h-full ${className || ''}`}>
-      <div className="flex gap-1 p-2 bg-[#0a0c10] border-b border-[#2a3342]">
-        <button
-          onClick={handleFitView}
-          className="px-3 py-1.5 text-xs bg-[#1a1f2a] hover:bg-[#242b3a] border border-[#2a3342] rounded text-[#e8ecf4]"
-        >
-          Fit View
-        </button>
-        <button
-          onClick={handleArrange}
-          className="px-3 py-1.5 text-xs bg-[#1a1f2a] hover:bg-[#242b3a] border border-[#2a3342] rounded text-[#e8ecf4]"
-        >
-          Auto Arrange
-        </button>
-        <button
-          onClick={syncToText}
-          className="px-3 py-1.5 text-xs bg-[#1a1f2a] hover:bg-[#242b3a] border border-[#2a3342] rounded text-[#e8ecf4]"
-        >
-          Sync to Text
-        </button>
+      <div className="flex items-center gap-2 h-10 px-4 bg-gray-900 border-b border-gray-800">
+        <Button size="xs" color="gray" onClick={handleFitView}>
+          <HiArrowsExpand className="w-3.5 h-3.5 mr-1.5" />
+          Fit
+        </Button>
+        <Button size="xs" color="gray" onClick={handleArrange}>
+          <HiViewGrid className="w-3.5 h-3.5 mr-1.5" />
+          Arrange
+        </Button>
       </div>
       <div ref={containerRef} className="flex-1 relative overflow-hidden">
         <canvas ref={canvasRef} className="w-full h-full" />

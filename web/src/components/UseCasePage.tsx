@@ -3,14 +3,12 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Button, Badge } from 'flowbite-react';
-import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiCollection } from 'react-icons/hi';
+import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiHome } from 'react-icons/hi';
 import Link from 'next/link';
 import {
   EXAMPLES,
-  EXAMPLE_CATEGORIES,
   Example,
   ExampleCategory,
-  detectJsonType,
 } from '@/lib/examples';
 
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false });
@@ -20,33 +18,29 @@ const LiteGraphViewer = dynamic(() => import('@/components/LiteGraphViewer'), { 
 
 type ViewTab = 'json' | 'visualization' | 'preview';
 
-function AutoonApp() {
+interface UseCasePageProps {
+  category: ExampleCategory;
+  title: string;
+  description: string;
+  mediaType: string;
+}
+
+function UseCasePageContent({ category, title, description, mediaType }: UseCasePageProps) {
+  const categoryExamples = EXAMPLES.filter((e) => e.category === category);
   const [toonContent, setToonContent] = useState('');
   const [jsonContent, setJsonContent] = useState<Record<string, unknown> | null>(null);
-  const [selectedExample, setSelectedExample] = useState<Example>(EXAMPLES[0]);
-  const [selectedCategory, setSelectedCategory] = useState<ExampleCategory>('schema');
+  const [selectedExample, setSelectedExample] = useState<Example>(categoryExamples[0]);
   const [activeTab, setActiveTab] = useState<ViewTab>('visualization');
-  const [detectedType, setDetectedType] = useState<ExampleCategory>('schema');
   const [leftPanelWidth, setLeftPanelWidth] = useState(450);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLElement>(null);
 
-  // Load initial example
   useEffect(() => {
-    loadExample(EXAMPLES[0]);
+    if (categoryExamples.length > 0) {
+      loadExample(categoryExamples[0]);
+    }
   }, []);
 
-  // Update JSON when Toon content changes
-  useEffect(() => {
-    if (selectedExample) {
-      // For now, we use the pre-defined JSON from examples
-      // In a real implementation, this would parse Toon to JSON
-      setJsonContent(selectedExample.json);
-      setDetectedType(detectJsonType(selectedExample.json));
-    }
-  }, [selectedExample]);
-
-  // Handle dragging
   useEffect(() => {
     if (!isDragging) return;
 
@@ -74,18 +68,7 @@ function AutoonApp() {
     setSelectedExample(example);
     setToonContent(example.toon);
     setJsonContent(example.json);
-    setDetectedType(example.category);
   };
-
-  const handleCategoryChange = (category: ExampleCategory) => {
-    setSelectedCategory(category);
-    const categoryExamples = EXAMPLES.filter((e) => e.category === category);
-    if (categoryExamples.length > 0) {
-      loadExample(categoryExamples[0]);
-    }
-  };
-
-  const categoryExamples = EXAMPLES.filter((e) => e.category === selectedCategory);
 
   const renderPreviewContent = () => {
     if (!jsonContent) {
@@ -111,8 +94,7 @@ function AutoonApp() {
         return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
 
       case 'preview':
-        // Show specialized preview based on detected type
-        if (detectedType === 'jsonrender') {
+        if (category === 'jsonrender') {
           return (
             <JsonRenderPreview
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,7 +103,7 @@ function AutoonApp() {
             />
           );
         }
-        if (detectedType === 'litegraph') {
+        if (category === 'litegraph') {
           return (
             <LiteGraphViewer
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,12 +112,11 @@ function AutoonApp() {
             />
           );
         }
-        // For schema/instance, show a structured view
         return (
           <div className="h-full overflow-auto p-4 bg-gray-900">
             <div className="max-w-2xl mx-auto">
               <h3 className="text-lg font-semibold text-white mb-4">
-                {detectedType === 'schema' ? 'Schema Structure' : 'Instance Data'}
+                {category === 'schema' ? 'Schema Structure' : 'Instance Data'}
               </h3>
               <pre className="text-sm text-gray-300 bg-gray-800 rounded-lg p-4 overflow-auto">
                 {JSON.stringify(jsonContent, null, 2)}
@@ -156,13 +137,13 @@ function AutoonApp() {
       case 'visualization':
         return <HiChartBar className="w-4 h-4" />;
       case 'preview':
-        if (detectedType === 'litegraph') return <HiCube className="w-4 h-4" />;
+        if (category === 'litegraph') return <HiCube className="w-4 h-4" />;
         return <HiTemplate className="w-4 h-4" />;
     }
   };
 
   const getPreviewLabel = () => {
-    switch (detectedType) {
+    switch (category) {
       case 'litegraph':
         return 'LiteGraph';
       case 'jsonrender':
@@ -172,69 +153,40 @@ function AutoonApp() {
     }
   };
 
+  const getBadgeColor = () => {
+    switch (category) {
+      case 'litegraph':
+        return 'purple';
+      case 'jsonrender':
+        return 'blue';
+      case 'schema':
+        return 'yellow';
+      default:
+        return 'green';
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-950 dark" data-theme="dark">
       {/* Header */}
       <header className="flex items-center justify-between h-14 px-6 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center font-bold text-gray-900 shadow-lg">
               A
             </div>
             <h1 className="text-lg font-semibold text-yellow-400">Autoon</h1>
-          </div>
-          <Badge color="gray">v0.2</Badge>
+          </Link>
+          <span className="text-gray-600">/</span>
+          <h2 className="text-sm font-medium text-gray-300">{title}</h2>
+          <Badge color={getBadgeColor()}>{mediaType}</Badge>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Use Case Pages */}
-          <div className="flex items-center gap-1 mr-2">
-            <Link
-              href="/json-schema"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Schema
-            </Link>
-            <Link
-              href="/json-instance"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Instance
-            </Link>
-            <Link
-              href="/json-render"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              Render
-            </Link>
-            <Link
-              href="/litegraph"
-              className="px-2 py-1 text-xs font-medium text-gray-400 hover:text-yellow-400 hover:bg-gray-800 rounded transition-colors"
-            >
-              LiteGraph
-            </Link>
-          </div>
-
-          <div className="w-px h-6 bg-gray-700" />
-
-          {/* Category selector */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => handleCategoryChange(e.target.value as ExampleCategory)}
-            className="h-8 px-3 text-xs font-medium bg-gray-800 border border-gray-700 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-          >
-            {EXAMPLE_CATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Example selector */}
           <select
             value={selectedExample.id}
             onChange={(e) => {
-              const example = EXAMPLES.find((ex) => ex.id === e.target.value);
+              const example = categoryExamples.find((ex) => ex.id === e.target.value);
               if (example) loadExample(example);
             }}
             className="h-8 px-3 text-xs font-medium bg-gray-800 border border-gray-700 rounded-lg text-gray-300 cursor-pointer hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
@@ -245,6 +197,13 @@ function AutoonApp() {
               </option>
             ))}
           </select>
+
+          <Link href="/">
+            <Button color="gray" size="sm">
+              <HiHome className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+          </Link>
 
           <Button
             color="gray"
@@ -260,7 +219,12 @@ function AutoonApp() {
         </div>
       </header>
 
-      {/* Main content - 2 panels */}
+      {/* Description bar */}
+      <div className="px-6 py-2 bg-gray-900/50 border-b border-gray-800">
+        <p className="text-xs text-gray-400">{description}</p>
+      </div>
+
+      {/* Main content */}
       <main ref={containerRef} className="flex-1 flex overflow-hidden">
         {/* Left Panel - Toon Editor */}
         <div className="flex flex-col bg-gray-900" style={{ width: leftPanelWidth }}>
@@ -288,7 +252,6 @@ function AutoonApp() {
 
         {/* Right Panel - Tabbed Views */}
         <div className="flex-1 flex flex-col bg-gray-900">
-          {/* Tab Bar */}
           <div className="flex items-center h-10 px-4 bg-gray-900 border-b border-gray-800 gap-1">
             <button
               onClick={() => setActiveTab('json')}
@@ -323,26 +286,8 @@ function AutoonApp() {
               {getTabIcon('preview')}
               {getPreviewLabel()}
             </button>
-
-            {/* Type indicator */}
-            <div className="ml-auto">
-              <Badge
-                color={
-                  detectedType === 'litegraph'
-                    ? 'purple'
-                    : detectedType === 'jsonrender'
-                    ? 'blue'
-                    : detectedType === 'schema'
-                    ? 'yellow'
-                    : 'green'
-                }
-              >
-                {EXAMPLE_CATEGORIES.find((c) => c.id === detectedType)?.name || detectedType}
-              </Badge>
-            </div>
           </div>
 
-          {/* Tab Content */}
           <div className="flex-1 overflow-hidden">{renderPreviewContent()}</div>
         </div>
       </main>
@@ -350,7 +295,7 @@ function AutoonApp() {
   );
 }
 
-export default function Home() {
+export default function UseCasePage(props: UseCasePageProps) {
   return (
     <Suspense
       fallback={
@@ -359,7 +304,7 @@ export default function Home() {
         </div>
       }
     >
-      <AutoonApp />
+      <UseCasePageContent {...props} />
     </Suspense>
   );
 }

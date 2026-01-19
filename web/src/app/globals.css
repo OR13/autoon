@@ -1,24 +1,5 @@
 @import "tailwindcss";
-
-:root {
-  --bg-deep: #0a0c10;
-  --bg-surface: #12151c;
-  --bg-elevated: #1a1f2a;
-  --bg-hover: #242b3a;
-  --border: #2a3342;
-  --border-focus: #4a90d9;
-  
-  --text-primary: #e8ecf4;
-  --text-secondary: #8b9cb6;
-  --text-muted: #5a6a84;
-  
-  --accent-cyan: #22d3ee;
-  --accent-cyan-dim: #0e7490;
-  --accent-emerald: #34d399;
-  --accent-amber: #fbbf24;
-  --accent-rose: #f472b6;
-  --accent-violet: #a78bfa;
-}
+@plugin "flowbite/plugin";
 
 * {
   box-sizing: border-box;
@@ -33,8 +14,11 @@ html, body {
 
 body {
   font-family: 'Outfit', system-ui, sans-serif;
-  background: var(--bg-deep);
-  color: var(--text-primary);
+  @apply bg-gray-950 text-gray-100;
+}
+
+:root {
+  color-scheme: dark;
 }
 
 /* Scrollbar */
@@ -44,40 +28,23 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-deep);
+  @apply bg-gray-950;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  @apply bg-gray-700 rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  @apply bg-gray-600;
 }
 
-/* LiteGraph overrides */
-.litegraph .litegraph-base {
-  background-color: var(--bg-deep) !important;
-}
-
-/* Animations */
+/* Animation */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
   animation: fade-in 0.2s ease-out forwards;
-}
-
-/* Radial gradient utility */
-.bg-gradient-radial {
-  background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
 }
