@@ -19,14 +19,16 @@ JSON based media types are sometimes very flexible, autoon profiles are designed
 
 For example:
 
-`application/autoon;profile=https://autoon.dev/profiles/json-schema` could be a toon profile for the `application/schema+json` media type (not actually registered with IANA), where "allOf/anyOf/oneOf" is forbidden.
+> `application/autoon;profile=https://autoon.dev/profiles/json-schema` could be a toon profile for the `application/schema+json` media type (not actually registered with IANA), where "allOf/anyOf/oneOf" is forbidden.
 
-`application/autoon;profile=https://autoon.dev/profiles/json-ld` could be a toon profile for the `application/ld+json` media type, where all instances of "@type" are represented with arrays.
+> `application/autoon;profile=https://autoon.dev/profiles/json-ld` could be a toon profile for the `application/ld+json` media type, where all instances of "@type" are represented with arrays.
 
 ComfyUI uses a node-based workflow editor, and the workflow JSON does not yet have a defined media type, Vercel published json-render as a way to declare ui via json, but it does not yet have a media type.
 
 Autoon is designed to gather up these useful JSON based formats, and provide utilities around them for working with LLMs via TOON.
-The assumption being that translating from JSON to TOON and back with the relevant profiles as context will result in lower token usage, and smarter designs... however that is not tested yet, and without good profiles, the results of naively using toon are likely to be worse than just using JSON.
+
+The assumption being that translating from JSON to TOON and back with the relevant profiles as context will result in lower token usage, and smarter designs.
+... However that is not tested yet, and without good profiles, the results of naively using toon are likely to be worse than just using JSON.
 
 ## Quick Start
 
