@@ -7,48 +7,15 @@ Opinionated profiles of popular JSON based media types for use with AI via the [
 Autoon uses `application/autoon` as the base media type with a `profile` parameter to indicate the specific JSON format being represented.
 JSON based media types are sometimes very flexible, autoon profiles are designed to make them as strict and deterministic as possible, while remaining valid when translated back to their original JSON based media type.
 
-| Use Case | Defacto Standard Media Type | Proposed Autoon Media Type |
-|----------|----------------------------|--------------------------|
-| Data Representation | `application/json` | `application/autoon;profile="https://autoon.dev/profiles/json-instance"` |
-| Data Validation | `application/schema+json` | `application/autoon;profile="https://autoon.dev/profiles/json-schema"` |
-| API Definition | `application/openapi+json` | `application/autoon;profile="https://autoon.dev/profiles/openapi"` |
-| RDF Representation | `application/ld+json` | `application/autoon;profile="https://autoon.dev/profiles/json-ld"` |
-| Geographic Representation | `application/geo+json` | `application/autoon;profile="https://autoon.dev/profiles/geojson"` |
-| Interface Definition | `application/json` | `application/autoon;profile="https://autoon.dev/profiles/json-render"` |
-| Workflow Representation | `application/json` | `application/autoon;profile="https://autoon.dev/profiles/json-workflow"` |
-
-### References
-
-- **Data Representation**
-  - [ECMA-404 JSON Standard](https://www.ecma-international.org/publications-and-standards/standards/ecma-404/)
-  - [RFC 8259: JSON Data Interchange Format](https://datatracker.ietf.org/doc/html/rfc8259)
-
-- **Data Validation**
-  - [JSON Schema Specification](https://json-schema.org/)
-  - [Understanding JSON Schema](https://json-schema.org/understanding-json-schema/)
-  - [IETF Draft: application/schema+json](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema)
-
-- **Interface Definition**
-  - [Vercel AI SDK UI](https://sdk.vercel.ai/docs)
-  - [vercel-labs/json-render](https://github.com/vercel-labs/json-render)
-
-- **Workflow Representation**
-  - [ComfyUI Workflow JSON Spec](https://docs.comfy.org/specs/workflow_json)
-  - [LiteGraph.js](https://github.com/jagenjo/litegraph.js)
-  - [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
-
-- **API Definition**
-  - [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-  - [OpenAPI Initiative](https://www.openapis.org/)
-
-- **RDF Representation**
-  - [JSON-LD Specification](https://json-ld.org/spec/latest/json-ld/)
-  - [W3C JSON-LD 1.1](https://www.w3.org/TR/json-ld11/)
-
-- **Geographic Representation**
-  - [RFC 7946: GeoJSON Format](https://datatracker.ietf.org/doc/html/rfc7946)
-  - [GeoJSON.org](https://geojson.org/)
-
+| Use Case | Media Type | References |
+|----------|------------|------------|
+| Data Representation | [`application/json`](https://www.iana.org/assignments/media-types/application/json) | [ECMA-404](https://www.ecma-international.org/publications-and-standards/standards/ecma-404/), [RFC 8259](https://datatracker.ietf.org/doc/html/rfc8259) |
+| Data Validation | [`application/schema+json`](https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema) | [JSON Schema](https://json-schema.org/), [Understanding JSON Schema](https://json-schema.org/understanding-json-schema/) |
+| API Definition | [`application/openapi+json`](https://spec.openapis.org/oas/latest.html) | [OpenAPI Spec](https://spec.openapis.org/oas/latest.html), [OpenAPI Initiative](https://www.openapis.org/) |
+| RDF Representation | [`application/ld+json`](https://www.iana.org/assignments/media-types/application/ld+json) | [JSON-LD Spec](https://json-ld.org/spec/latest/json-ld/), [W3C JSON-LD 1.1](https://www.w3.org/TR/json-ld11/) |
+| Geographic Representation | [`application/geo+json`](https://www.iana.org/assignments/media-types/application/geo+json) | [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946), [GeoJSON.org](https://geojson.org/) |
+| Interface Definition | [`application/json`](https://www.iana.org/assignments/media-types/application/json) | [Vercel AI SDK](https://sdk.vercel.ai/docs), [json-render](https://github.com/vercel-labs/json-render) |
+| Workflow Representation | [`application/json`](https://www.iana.org/assignments/media-types/application/json) | [ComfyUI Spec](https://docs.comfy.org/specs/workflow_json), [LiteGraph.js](https://github.com/jagenjo/litegraph.js), [ComfyUI](https://github.com/comfyanonymous/ComfyUI) |
 
 ## Quick Start
 
