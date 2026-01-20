@@ -28,7 +28,8 @@ ComfyUI uses a node-based workflow editor, and the workflow JSON does not yet ha
 Autoon is designed to gather up these useful JSON based formats, and provide utilities around them for working with LLMs via TOON.
 
 The assumption being that translating from JSON to TOON and back with the relevant profiles as context will result in lower token usage, and smarter designs.
-... However that is not tested yet, and without good profiles, the results of naively using toon are likely to be worse than just using JSON.
+
+However that is not tested yet, and without good profiles, the results of naively using toon are likely to be worse than just using JSON.
 
 ## Quick Start
 
