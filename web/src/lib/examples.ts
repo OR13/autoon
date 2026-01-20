@@ -1,5 +1,24 @@
+import { encode } from '@toon-format/toon';
+
 // Example categories
 export type ExampleCategory = 'schema' | 'instance' | 'jsonrender' | 'litegraph';
+
+// Schema graph type for GraphEditor
+export interface SchemaGraphNode {
+  label: string;
+  type?: 'object' | 'property' | 'type' | 'constraint';
+}
+
+export interface SchemaGraphEdge {
+  source: string;
+  target: string;
+  relation?: string;
+}
+
+export interface SchemaGraph {
+  nodes: Record<string, SchemaGraphNode>;
+  edges: SchemaGraphEdge[];
+}
 
 export interface Example {
   id: string;
@@ -12,23 +31,6 @@ export interface Example {
 // ============================================
 // JSON Schema Examples
 // ============================================
-
-// TOON format: direct representation of the JSON Schema
-const personSchemaToon = `schema{$id,$schema,title,type,additionalProperties}:
-  https://example.com/person.schema.json,https://json-schema.org/draft/2020-12/schema,Person,object,false
-
-properties[7]{name,type,description,minimum,format,pattern,default}:
-  firstName,string,The person's first name.,,,,
-  lastName,string,The person's last name.,,,,
-  age,integer,Age in years which must be equal to or greater than zero.,0,,,
-  email,string,,,,email,,
-  phone,string,,,,^\\+?[0-9]{10,14}$,
-  address,object,,,,,
-  isActive,boolean,,,,,,true
-
-required[2]:
-  firstName
-  lastName`;
 
 const personSchemaJson = {
   $id: 'https://example.com/person.schema.json',
@@ -69,22 +71,6 @@ const personSchemaJson = {
   additionalProperties: false,
 };
 
-const productSchemaToon = `schema{$id,$schema,title,type}:
-  https://example.com/product.schema.json,https://json-schema.org/draft/2020-12/schema,Product,object
-
-properties[6]{name,type,format,minLength,minimum,enum,default,uniqueItems}:
-  id,string,uuid,,,,,
-  name,string,,1,,,,
-  price,number,,,0,,,
-  category,string,,,,electronics|clothing|food|other,,
-  inStock,boolean,,,,,true,
-  tags,array,,,,,,true
-
-required[3]:
-  id
-  name
-  price`;
-
 const productSchemaJson = {
   $id: 'https://example.com/product.schema.json',
   $schema: 'https://json-schema.org/draft/2020-12/schema',
@@ -124,9 +110,6 @@ const productSchemaJson = {
 // JSON Instance Examples
 // ============================================
 
-const personInstanceToon = `person{firstName,lastName,age,email,isActive}:
-  John,Doe,30,john.doe@example.com,true`;
-
 const personInstanceJson = {
   firstName: 'John',
   lastName: 'Doe',
@@ -134,9 +117,6 @@ const personInstanceJson = {
   email: 'john.doe@example.com',
   isActive: true,
 };
-
-const productInstanceToon = `product{id,name,price,category,inStock,tags}:
-  550e8400-e29b-41d4-a716-446655440000,Wireless Headphones,79.99,electronics,true,["audio","wireless","bluetooth"]`;
 
 const productInstanceJson = {
   id: '550e8400-e29b-41d4-a716-446655440000',
@@ -150,14 +130,6 @@ const productInstanceJson = {
 // ============================================
 // JSON Render Examples (Vercel AI UI Components)
 // ============================================
-
-const dashboardRenderToon = `component{type,title}:
-  Card,Revenue Dashboard
-
-children[3]{type,label,value,trend,data}:
-  Metric,Total Revenue,$125430,+12.5%,
-  Metric,Active Users,2847,+5.2%,
-  BarChart,,,,{"data":[{"month":"Jan","value":4000},{"month":"Feb","value":3000},{"month":"Mar","value":5000}]}`;
 
 const dashboardRenderJson = {
   type: 'Card',
@@ -183,17 +155,6 @@ const dashboardRenderJson = {
     },
   ],
 };
-
-const formRenderToon = `component{type,title,action}:
-  Form,Contact Us,submit-contact
-
-children[6]{type,name,label,required,type2,rows,options,variant}:
-  TextInput,name,Full Name,true,,,,
-  TextInput,email,Email,true,email,,,
-  Select,subject,Subject,,,,"General|Support|Sales",
-  TextArea,message,Message,,,4,,
-  Checkbox,subscribe,Subscribe to newsletter,,,,,
-  Button,,,,,,,primary`;
 
 const formRenderJson = {
   type: 'Form',
@@ -233,22 +194,6 @@ const formRenderJson = {
 // ============================================
 // LiteGraph/ComfyUI Examples
 // ============================================
-
-const simpleWorkflowToon = `workflow{version,lastNodeId,lastLinkId}:
-  1,4,4
-
-nodes[4]{id,type,pos_x,pos_y,widgets_values}:
-  1,CheckpointLoaderSimple,50,200,["v1-5-pruned.safetensors"]
-  2,CLIPTextEncode,300,100,["a beautiful sunset over mountains"]
-  3,CLIPTextEncode,300,300,["blurry, bad quality"]
-  4,KSampler,550,200,["euler",20,8,1234]
-
-links[5]{id,origin_id,origin_slot,target_id,target_slot,type}:
-  1,1,0,4,0,MODEL
-  2,1,1,2,0,CLIP
-  3,1,1,3,0,CLIP
-  4,2,0,4,1,CONDITIONING
-  5,3,0,4,2,CONDITIONING`;
 
 const simpleWorkflowJson = {
   version: 1,
@@ -317,27 +262,6 @@ const simpleWorkflowJson = {
     { id: 5, origin_id: 3, origin_slot: 0, target_id: 4, target_slot: 2, type: 'CONDITIONING' },
   ],
 };
-
-const img2imgWorkflowToon = `workflow{version,lastNodeId,lastLinkId}:
-  1,6,8
-
-nodes[6]{id,type,pos_x,pos_y,widgets_values}:
-  1,LoadImage,50,150,["input.png"]
-  2,CheckpointLoaderSimple,50,350,["v1-5-pruned.safetensors"]
-  3,VAEEncode,300,150,[]
-  4,CLIPTextEncode,300,300,["cyberpunk city, neon lights, futuristic"]
-  5,KSampler,550,200,["euler",20,7,42,0.75]
-  6,VAEDecode,800,200,[]
-
-links[8]{id,origin_id,origin_slot,target_id,target_slot,type}:
-  1,1,0,3,0,IMAGE
-  2,2,0,5,0,MODEL
-  3,2,1,4,0,CLIP
-  4,2,2,3,1,VAE
-  5,3,0,5,3,LATENT
-  6,4,0,5,1,CONDITIONING
-  7,5,0,6,0,LATENT
-  8,2,2,6,1,VAE`;
 
 const img2imgWorkflowJson = {
   version: 1,
@@ -443,14 +367,14 @@ export const EXAMPLES: Example[] = [
     id: 'person-schema',
     name: 'Person Schema',
     category: 'schema',
-    toon: personSchemaToon,
+    toon: encode(personSchemaJson),
     json: personSchemaJson,
   },
   {
     id: 'product-schema',
     name: 'Product Schema',
     category: 'schema',
-    toon: productSchemaToon,
+    toon: encode(productSchemaJson),
     json: productSchemaJson,
   },
   // Instance examples
@@ -458,14 +382,14 @@ export const EXAMPLES: Example[] = [
     id: 'person-instance',
     name: 'Person Instance',
     category: 'instance',
-    toon: personInstanceToon,
+    toon: encode(personInstanceJson),
     json: personInstanceJson,
   },
   {
     id: 'product-instance',
     name: 'Product Instance',
     category: 'instance',
-    toon: productInstanceToon,
+    toon: encode(productInstanceJson),
     json: productInstanceJson,
   },
   // JSON Render examples
@@ -473,14 +397,14 @@ export const EXAMPLES: Example[] = [
     id: 'dashboard-render',
     name: 'Dashboard UI',
     category: 'jsonrender',
-    toon: dashboardRenderToon,
+    toon: encode(dashboardRenderJson),
     json: dashboardRenderJson,
   },
   {
     id: 'form-render',
     name: 'Contact Form',
     category: 'jsonrender',
-    toon: formRenderToon,
+    toon: encode(formRenderJson),
     json: formRenderJson,
   },
   // LiteGraph examples
@@ -488,14 +412,14 @@ export const EXAMPLES: Example[] = [
     id: 'simple-workflow',
     name: 'Simple Workflow',
     category: 'litegraph',
-    toon: simpleWorkflowToon,
+    toon: encode(simpleWorkflowJson),
     json: simpleWorkflowJson,
   },
   {
     id: 'img2img-workflow',
     name: 'Img2Img Workflow',
     category: 'litegraph',
-    toon: img2imgWorkflowToon,
+    toon: encode(img2imgWorkflowJson),
     json: img2imgWorkflowJson,
   },
 ];

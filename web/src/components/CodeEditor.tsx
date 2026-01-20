@@ -23,36 +23,54 @@ const ayuMirageTheme = createTheme({
     gutterBorder: 'transparent',
   },
   styles: [
+    // Comments
     { tag: t.comment, color: '#5c6773', fontStyle: 'italic' },
     { tag: t.lineComment, color: '#5c6773', fontStyle: 'italic' },
     { tag: t.blockComment, color: '#5c6773', fontStyle: 'italic' },
     { tag: t.docComment, color: '#5c6773', fontStyle: 'italic' },
+    
+    // Strings
     { tag: t.string, color: '#bae67e' },
-    { tag: t.special(t.string), color: '#bae67e' },
+    { tag: t.special(t.string), color: '#d4bfff' }, // UUIDs, emails - purple tint
+    
+    // Literals
     { tag: t.number, color: '#ffcc66' },
-    { tag: t.bool, color: '#ffcc66' },
-    { tag: t.null, color: '#ffcc66' },
-    { tag: t.keyword, color: '#ffa759' },
-    { tag: t.operator, color: '#f29e74' },
+    { tag: t.bool, color: '#ffae57' }, // Orange for booleans
+    { tag: t.null, color: '#f28779' }, // Coral for null
+    
+    // Keywords & Types
+    { tag: t.keyword, color: '#ffa759', fontWeight: 'bold' }, // Section names bold
+    { tag: t.typeName, color: '#73d0ff' }, // Type names like string, object, array
     { tag: t.className, color: '#73d0ff' },
     { tag: t.definition(t.typeName), color: '#73d0ff' },
-    { tag: t.typeName, color: '#73d0ff' },
-    { tag: t.angleBracket, color: '#cbccc6' },
-    { tag: t.tagName, color: '#5ccfe6' },
+    
+    // Properties & Attributes
+    { tag: t.propertyName, color: '#5ccfe6' }, // Field names in headers
+    { tag: t.definition(t.propertyName), color: '#5ccfe6' },
     { tag: t.attributeName, color: '#ffd580' },
     { tag: t.attributeValue, color: '#bae67e' },
-    { tag: t.definition(t.propertyName), color: '#5ccfe6' },
-    { tag: t.propertyName, color: '#5ccfe6' },
+    
+    // Special values
+    { tag: t.atom, color: '#d4bfff' }, // Enum values (pipe-separated)
+    { tag: t.url, color: '#95e6cb', textDecoration: 'underline' }, // URLs - teal underlined
+    { tag: t.regexp, color: '#f29e74' }, // Regex patterns - orange
+    
+    // Brackets & Punctuation
+    { tag: t.squareBracket, color: '#ffd580' }, // Array count brackets [N] - gold
+    { tag: t.brace, color: '#ff9f7e' }, // Field braces {fields} - peach
+    { tag: t.punctuation, color: '#707a8c' }, // Commas, colons - dimmed
+    { tag: t.paren, color: '#cbccc6' },
+    { tag: t.angleBracket, color: '#cbccc6' },
+    { tag: t.derefOperator, color: '#cbccc6' },
+    { tag: t.separator, color: '#707a8c' },
+    
+    // Variables & Functions
     { tag: t.variableName, color: '#cbccc6' },
     { tag: t.definition(t.variableName), color: '#cbccc6' },
     { tag: t.function(t.variableName), color: '#ffd580' },
     { tag: t.function(t.propertyName), color: '#ffd580' },
-    { tag: t.punctuation, color: '#cbccc6' },
-    { tag: t.paren, color: '#cbccc6' },
-    { tag: t.squareBracket, color: '#cbccc6' },
-    { tag: t.brace, color: '#cbccc6' },
-    { tag: t.derefOperator, color: '#cbccc6' },
-    { tag: t.separator, color: '#cbccc6' },
+    { tag: t.operator, color: '#f29e74' },
+    { tag: t.tagName, color: '#5ccfe6' },
   ],
 });
 

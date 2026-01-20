@@ -121,6 +121,27 @@ function AutoonApp() {
         );
 
       case 'visualization':
+        // Show specialized visualizations based on detected type
+        if (detectedType === 'jsonrender') {
+          return (
+            <JsonRenderPreview
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              json={jsonContent as any}
+              className="h-full"
+              style={{ backgroundColor: 'var(--color-bg-surface)' }}
+            />
+          );
+        }
+        if (detectedType === 'litegraph') {
+          return (
+            <LiteGraphViewer
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              json={jsonContent as any}
+              className="h-full"
+            />
+          );
+        }
+        // Default: show JSON tree visualization
         return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
 
       case 'preview':
@@ -172,6 +193,9 @@ function AutoonApp() {
       case 'json':
         return <HiCode className="w-4 h-4" />;
       case 'visualization':
+        // Show context-specific icon based on detected type
+        if (detectedType === 'litegraph') return <HiCube className="w-4 h-4" />;
+        if (detectedType === 'jsonrender') return <HiTemplate className="w-4 h-4" />;
         return <HiChartBar className="w-4 h-4" />;
       case 'preview':
         if (detectedType === 'litegraph') return <HiCube className="w-4 h-4" />;
@@ -179,10 +203,21 @@ function AutoonApp() {
     }
   };
 
+  const getVisualizationLabel = () => {
+    switch (detectedType) {
+      case 'litegraph':
+        return 'Workflow JSON';
+      case 'jsonrender':
+        return 'UI Preview';
+      default:
+        return 'Visualize';
+    }
+  };
+
   const getPreviewLabel = () => {
     switch (detectedType) {
       case 'litegraph':
-        return 'LiteGraph';
+        return 'Workflow JSON';
       case 'jsonrender':
         return 'UI Preview';
       default:
@@ -195,20 +230,36 @@ function AutoonApp() {
       {/* Header */}
       <nav className="autoon-header flex items-center justify-between" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
         <a href="/" className="flex items-center gap-3">
-          <svg viewBox="0 0 32 32" className="w-8 h-8">
-            <polygon 
-              points="16,2 28,9 28,23 16,30 4,23 4,9" 
-              fill="#1F2430"
-              stroke="#73D0FF" 
-              strokeWidth="2"
-            />
-            <circle cx="16" cy="2" r="3" fill="#FFAD66"/>
-            <circle cx="28" cy="9" r="3" fill="#FFAD66"/>
-            <circle cx="28" cy="23" r="3" fill="#FFAD66"/>
-            <circle cx="16" cy="30" r="3" fill="#FFAD66"/>
-            <circle cx="4" cy="23" r="3" fill="#FFAD66"/>
-            <circle cx="4" cy="9" r="3" fill="#FFAD66"/>
-          </svg>
+          <div className="logo-container w-8 h-8">
+            <div className="logo-glow-ring" />
+            <svg viewBox="0 0 32 32" className="w-8 h-8 logo-svg">
+              <defs>
+                <linearGradient id="headerHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#2D3748"/>
+                  <stop offset="100%" stopColor="#1A202C"/>
+                </linearGradient>
+                <linearGradient id="headerStrokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00D4FF"/>
+                  <stop offset="50%" stopColor="#7C3AED"/>
+                  <stop offset="100%" stopColor="#F472B6"/>
+                </linearGradient>
+                <radialGradient id="headerNodeGrad" cx="30%" cy="30%">
+                  <stop offset="0%" stopColor="#FFF"/>
+                  <stop offset="50%" stopColor="#FFD700"/>
+                  <stop offset="100%" stopColor="#FF8C00"/>
+                </radialGradient>
+              </defs>
+              <polygon
+                points="16,5 25,10 25,22 16,27 7,22 7,10"
+                fill="url(#headerHexGrad)"
+                stroke="url(#headerStrokeGrad)"
+                strokeWidth="1.5"
+              />
+              <circle cx="16" cy="5" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-1"/>
+              <circle cx="25" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-2"/>
+              <circle cx="7" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-3"/>
+            </svg>
+          </div>
           <span className="text-xl font-semibold" style={{ color: 'var(--color-brand-primary)' }}>
             Autoon
           </span>
@@ -253,14 +304,17 @@ function AutoonApp() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="autoon-btn"
+                className="flex items-center gap-2 text-sm font-medium transition-colors"
                 style={{ 
-                  minWidth: '160px',
-                  justifyContent: 'space-between'
+                  color: 'var(--color-text-primary)',
+                  padding: '0.375rem 0'
                 }}
               >
                 <span>{selectedExample.name}</span>
-                <HiChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <HiChevronDown 
+                  className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  style={{ color: 'var(--color-text-muted)' }}
+                />
               </button>
               
               {isDropdownOpen && (
@@ -373,7 +427,7 @@ function AutoonApp() {
               className={`autoon-tab ${activeTab === 'visualization' ? 'autoon-tab-active' : ''}`}
             >
               {getTabIcon('visualization')}
-              Visualize
+              {getVisualizationLabel()}
             </button>
           </div>
 

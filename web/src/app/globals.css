@@ -206,3 +206,64 @@ body {
 .animate-fade-in {
   animation: fade-in 0.2s ease-out forwards;
 }
+
+/* Logo rotating glow animation */
+@keyframes logo-glow-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes logo-glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes logo-node-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 1px currentColor);
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 3px currentColor);
+    opacity: 1;
+  }
+}
+
+.logo-container {
+  position: relative;
+}
+
+.logo-glow-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(0, 212, 255, 0.5) 60deg,
+    rgba(124, 58, 237, 0.5) 120deg,
+    rgba(244, 114, 182, 0.4) 180deg,
+    rgba(255, 215, 0, 0.3) 240deg,
+    transparent 300deg,
+    transparent 360deg
+  );
+  animation: logo-glow-rotate 8s linear infinite, logo-glow-pulse 4s ease-in-out infinite;
+  filter: blur(4px);
+  z-index: -1;
+}
+
+.logo-svg {
+  position: relative;
+  z-index: 1;
+}
+
+.logo-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-node-glow 5s ease-in-out infinite;
+}
+
+.logo-node-1 { animation-delay: 0s; }
+.logo-node-2 { animation-delay: 1.6s; }
+.logo-node-3 { animation-delay: 3.3s; }
+

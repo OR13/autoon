@@ -91,6 +91,26 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
         );
 
       case 'visualization':
+        // Show specialized visualizations based on category
+        if (category === 'jsonrender') {
+          return (
+            <JsonRenderPreview
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              json={jsonContent as any}
+              className="h-full bg-gray-900"
+            />
+          );
+        }
+        if (category === 'litegraph') {
+          return (
+            <LiteGraphViewer
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              json={jsonContent as any}
+              className="h-full"
+            />
+          );
+        }
+        // Default: show JSON tree visualization
         return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
 
       case 'preview':
@@ -135,6 +155,9 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
       case 'json':
         return <HiCode className="w-4 h-4" />;
       case 'visualization':
+        // Show context-specific icon based on category
+        if (category === 'litegraph') return <HiCube className="w-4 h-4" />;
+        if (category === 'jsonrender') return <HiTemplate className="w-4 h-4" />;
         return <HiChartBar className="w-4 h-4" />;
       case 'preview':
         if (category === 'litegraph') return <HiCube className="w-4 h-4" />;
@@ -142,10 +165,21 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
     }
   };
 
+  const getVisualizationLabel = () => {
+    switch (category) {
+      case 'litegraph':
+        return 'Workflow JSON';
+      case 'jsonrender':
+        return 'UI Preview';
+      default:
+        return 'Visualize';
+    }
+  };
+
   const getPreviewLabel = () => {
     switch (category) {
       case 'litegraph':
-        return 'LiteGraph';
+        return 'Workflow JSON';
       case 'jsonrender':
         return 'UI Preview';
       default:
@@ -172,8 +206,35 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
       <header className="flex items-center justify-between h-14 px-6 bg-gray-900 border-b border-gray-800">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center font-bold text-gray-900 shadow-lg">
-              A
+            <div className="logo-container w-8 h-8">
+              <div className="logo-glow-ring" />
+              <svg viewBox="0 0 32 32" className="w-8 h-8 logo-svg">
+                <defs>
+                  <linearGradient id="useCaseHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2D3748"/>
+                    <stop offset="100%" stopColor="#1A202C"/>
+                  </linearGradient>
+                  <linearGradient id="useCaseStrokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#00D4FF"/>
+                    <stop offset="50%" stopColor="#7C3AED"/>
+                    <stop offset="100%" stopColor="#F472B6"/>
+                  </linearGradient>
+                  <radialGradient id="useCaseNodeGrad" cx="30%" cy="30%">
+                    <stop offset="0%" stopColor="#FFF"/>
+                    <stop offset="50%" stopColor="#FFD700"/>
+                    <stop offset="100%" stopColor="#FF8C00"/>
+                  </radialGradient>
+                </defs>
+                <polygon
+                  points="16,5 25,10 25,22 16,27 7,22 7,10"
+                  fill="url(#useCaseHexGrad)"
+                  stroke="url(#useCaseStrokeGrad)"
+                  strokeWidth="1.5"
+                />
+                <circle cx="16" cy="5" r="2" fill="url(#useCaseNodeGrad)" className="logo-node logo-node-1"/>
+                <circle cx="25" cy="22" r="2" fill="url(#useCaseNodeGrad)" className="logo-node logo-node-2"/>
+                <circle cx="7" cy="22" r="2" fill="url(#useCaseNodeGrad)" className="logo-node logo-node-3"/>
+              </svg>
             </div>
             <h1 className="text-lg font-semibold text-yellow-400">Autoon</h1>
           </Link>
@@ -273,7 +334,7 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
               }`}
             >
               {getTabIcon('visualization')}
-              Visualize
+              {getVisualizationLabel()}
             </button>
             <button
               onClick={() => setActiveTab('preview')}

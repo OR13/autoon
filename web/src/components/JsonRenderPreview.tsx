@@ -12,6 +12,7 @@ export interface JsonRenderComponent {
 interface JsonRenderPreviewProps {
   json: JsonRenderComponent | null;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 // Helper to safely get string prop
@@ -237,17 +238,17 @@ function renderComponent(component: JsonRenderComponent, key: number | string = 
   }
 }
 
-export default function JsonRenderPreview({ json, className }: JsonRenderPreviewProps) {
+export default function JsonRenderPreview({ json, className, style }: JsonRenderPreviewProps) {
   if (!json) {
     return (
-      <div className={`flex items-center justify-center h-full text-gray-500 ${className || ''}`}>
+      <div className={`flex items-center justify-center h-full text-gray-500 ${className || ''}`} style={style}>
         No JSON Render data to preview
       </div>
     );
   }
 
   return (
-    <div className={`p-4 overflow-auto ${className || ''}`}>
+    <div className={`p-4 overflow-auto ${className || ''}`} style={style}>
       <div className="max-w-lg mx-auto">{renderComponent(json)}</div>
     </div>
   );

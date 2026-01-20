@@ -7,6 +7,7 @@
 import { parseArgs } from 'util';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname, extname, basename } from 'path';
+import { encode as toonEncode, decode as toonDecode } from '@toon-format/toon';
 import { validateAutoon } from '../core/validator.js';
 import { jsonToToon, toonToJson } from '../core/converter.js';
 import type { AutoonDocument, Graph } from '../core/types.js';
@@ -276,55 +277,78 @@ autoon visualize models/process/example.json -f dot
   console.log(`\n  ✨ Project initialized! Try: autoon validate models/class/example.toon\n`);
 }
 
+/**
+ * Check if a JSON object is an Autoon graph document
+ */
+function isAutoonDocument(obj: unknown): obj is AutoonDocument {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const doc = obj as Record<string, unknown>;
+  return 'graph' in doc || 'graphs' in doc;
+}
+
 function cmdGenerate(file: string, output?: string, format?: string) {
   if (!existsSync(file)) {
     console.error(`Error: File not found: ${file}`);
     process.exit(1);
   }
-  
+
   const content = readFileSync(file, 'utf-8');
   const ext = extname(file).toLowerCase();
-  
+
   let result: string;
   let outExt: string;
-  
+
   // Auto-detect input format
-  if (ext === '.json' || content.trim().startsWith('{')) {
+  if (ext === '.json' || content.trim().startsWith('{') || content.trim().startsWith('[')) {
     // JSON to TOON
-    const doc = JSON.parse(content) as AutoonDocument;
-    const validation = validateAutoon(doc);
-    if (!validation.valid) {
-      console.error('Validation errors:');
-      validation.errors?.forEach(e => console.error(`  - ${e.path}: ${e.message}`));
-      process.exit(1);
-    }
-    
-    if (format === 'json') {
-      result = JSON.stringify(doc, null, 2);
-      outExt = '.json';
+    const parsed = JSON.parse(content);
+
+    // Check if it's an Autoon graph document or generic JSON
+    if (isAutoonDocument(parsed)) {
+      // Autoon document - validate and use custom converter
+      const validation = validateAutoon(parsed);
+      if (!validation.valid) {
+        console.error('Validation errors:');
+        validation.errors?.forEach(e => console.error(`  - ${e.path}: ${e.message}`));
+        process.exit(1);
+      }
+
+      if (format === 'json') {
+        result = JSON.stringify(parsed, null, 2);
+        outExt = '.json';
+      } else {
+        result = jsonToToon(parsed);
+        outExt = '.toon';
+      }
     } else {
-      result = jsonToToon(doc);
-      outExt = '.toon';
+      // Generic JSON - use @toon-format/toon library
+      if (format === 'json') {
+        result = JSON.stringify(parsed, null, 2);
+        outExt = '.json';
+      } else {
+        result = toonEncode(parsed);
+        outExt = '.toon';
+      }
     }
   } else {
-    // TOON to JSON
-    const doc = toonToJson(content);
-    const validation = validateAutoon(doc);
-    if (!validation.valid) {
-      console.error('Validation errors:');
-      validation.errors?.forEach(e => console.error(`  - ${e.path}: ${e.message}`));
-      process.exit(1);
+    // TOON to JSON - try to decode with @toon-format/toon first
+    let decoded: unknown;
+    try {
+      decoded = toonDecode(content);
+    } catch {
+      // Fall back to custom Autoon TOON parser
+      decoded = toonToJson(content);
     }
-    
+
     if (format === 'toon') {
-      result = jsonToToon(doc);
+      result = toonEncode(decoded);
       outExt = '.toon';
     } else {
-      result = JSON.stringify(doc, null, 2);
+      result = JSON.stringify(decoded, null, 2);
       outExt = '.json';
     }
   }
-  
+
   if (output) {
     writeFileSync(output, result);
     console.log(`✓ Generated: ${output}`);

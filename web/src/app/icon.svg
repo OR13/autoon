@@ -1,17 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Hexagon edges -->
-  <polygon 
-    points="16,2 28,9 28,23 16,30 4,23 4,9" 
-    fill="#1F2430"
-    stroke="#73D0FF" 
-    stroke-width="2"
+  <defs>
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Hexagon gradient -->
+    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748"/>
+      <stop offset="100%" stop-color="#1A202C"/>
+    </linearGradient>
+
+    <!-- Stroke gradient -->
+    <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#F472B6"/>
+    </linearGradient>
+
+    <!-- Node gradient -->
+    <radialGradient id="nodeGrad" cx="30%" cy="30%">
+      <stop offset="0%" stop-color="#FFF"/>
+      <stop offset="50%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#FF8C00"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Hexagon -->
+  <polygon
+    points="16,5 25,10 25,22 16,27 7,22 7,10"
+    fill="url(#hexGrad)"
+    stroke="url(#strokeGrad)"
+    stroke-width="1.5"
+    filter="url(#glow)"
   />
-  
-  <!-- Six nodes at vertices -->
-  <circle cx="16" cy="2" r="3" fill="#FFAD66"/>
-  <circle cx="28" cy="9" r="3" fill="#FFAD66"/>
-  <circle cx="28" cy="23" r="3" fill="#FFAD66"/>
-  <circle cx="16" cy="30" r="3" fill="#FFAD66"/>
-  <circle cx="4" cy="23" r="3" fill="#FFAD66"/>
-  <circle cx="4" cy="9" r="3" fill="#FFAD66"/>
+
+  <!-- Three accent nodes -->
+  <circle cx="16" cy="5" r="2" fill="url(#nodeGrad)" filter="url(#glow)"/>
+  <circle cx="25" cy="22" r="2" fill="url(#nodeGrad)" filter="url(#glow)"/>
+  <circle cx="7" cy="22" r="2" fill="url(#nodeGrad)" filter="url(#glow)"/>
 </svg>
