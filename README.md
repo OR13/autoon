@@ -9,7 +9,6 @@ JSON based media types are sometimes very flexible, autoon profiles are designed
 
 | Use Case | Defacto Standard Media Type | Proposed Autoon Media Type |
 |----------|----------------------------|--------------------------|
-
 | Data Representation | `application/json` | `application/autoon;profile="https://autoon.dev/profiles/json-instance"` |
 | Data Validation | `application/schema+json` | `application/autoon;profile="https://autoon.dev/profiles/json-schema"` |
 | API Definition | `application/openapi+json` | `application/autoon;profile="https://autoon.dev/profiles/openapi"` |
