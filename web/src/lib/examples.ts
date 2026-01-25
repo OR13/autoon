@@ -1,7 +1,7 @@
 import { encode } from '@toon-format/toon';
 
 // Example categories
-export type ExampleCategory = 'schema' | 'instance' | 'generative-ui' | 'litegraph';
+export type ExampleCategory = 'schema' | 'instance' | 'generative-ui' | 'nodal-ui';
 
 // Schema graph type for GraphEditor
 export interface SchemaGraphNode {
@@ -192,7 +192,7 @@ const formRenderJson = {
 };
 
 // ============================================
-// LiteGraph/ComfyUI Examples
+// Nodal UI Examples (LiteGraph/ComfyUI)
 // ============================================
 
 const simpleWorkflowJson = {
@@ -407,18 +407,18 @@ export const EXAMPLES: Example[] = [
     toon: encode(formRenderJson),
     json: formRenderJson,
   },
-  // LiteGraph examples
+  // Nodal UI examples
   {
     id: 'simple-workflow',
     name: 'Simple Workflow',
-    category: 'litegraph',
+    category: 'nodal-ui',
     toon: encode(simpleWorkflowJson),
     json: simpleWorkflowJson,
   },
   {
     id: 'img2img-workflow',
     name: 'Img2Img Workflow',
-    category: 'litegraph',
+    category: 'nodal-ui',
     toon: encode(img2imgWorkflowJson),
     json: img2imgWorkflowJson,
   },
@@ -428,7 +428,7 @@ export const EXAMPLE_CATEGORIES: { id: ExampleCategory; name: string }[] = [
   { id: 'schema', name: 'JSON Schema' },
   { id: 'instance', name: 'JSON Instance' },
   { id: 'generative-ui', name: 'Generative UI' },
-  { id: 'litegraph', name: 'LiteGraph' },
+  { id: 'nodal-ui', name: 'Nodal UI' },
 ];
 
 // Helper to get examples by category
@@ -438,9 +438,9 @@ export function getExamplesByCategory(category: ExampleCategory): Example[] {
 
 // Helper to detect JSON type from content
 export function detectJsonType(json: Record<string, unknown>): ExampleCategory {
-  // Check for LiteGraph/ComfyUI format
+  // Check for Nodal UI format (LiteGraph/ComfyUI)
   if (json.nodes && json.links && (json.version !== undefined || json.state)) {
-    return 'litegraph';
+    return 'nodal-ui';
   }
 
   // Check for Generative UI format

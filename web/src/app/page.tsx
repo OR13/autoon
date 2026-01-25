@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, Suspense, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Badge } from 'flowbite-react';
-import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiSearch, HiChevronDown } from 'react-icons/hi';
+import { HiCode, HiChartBar, HiTemplate, HiCube, HiSearch, HiChevronDown } from 'react-icons/hi';
+import Header from '@/components/Header';
 import {
   EXAMPLES,
   Example,
@@ -280,7 +280,7 @@ function AutoonApp() {
             />
           );
         }
-        if (detectedType === 'litegraph') {
+        if (detectedType === 'nodal-ui') {
           return (
             <LiteGraphViewer
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -303,7 +303,7 @@ function AutoonApp() {
             />
           );
         }
-        if (detectedType === 'litegraph') {
+        if (detectedType === 'nodal-ui') {
           return (
             <LiteGraphViewer
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -342,18 +342,18 @@ function AutoonApp() {
         return <HiCode className="w-4 h-4" />;
       case 'visualization':
         // Show context-specific icon based on detected type
-        if (detectedType === 'litegraph') return <HiCube className="w-4 h-4" />;
+        if (detectedType === 'nodal-ui') return <HiCube className="w-4 h-4" />;
         if (detectedType === 'generative-ui') return <HiTemplate className="w-4 h-4" />;
         return <HiChartBar className="w-4 h-4" />;
       case 'preview':
-        if (detectedType === 'litegraph') return <HiCube className="w-4 h-4" />;
+        if (detectedType === 'nodal-ui') return <HiCube className="w-4 h-4" />;
         return <HiTemplate className="w-4 h-4" />;
     }
   };
 
   const getVisualizationLabel = () => {
     switch (detectedType) {
-      case 'litegraph':
+      case 'nodal-ui':
         return 'Workflow JSON';
       case 'generative-ui':
         return 'Generative UI';
@@ -364,7 +364,7 @@ function AutoonApp() {
 
   const getPreviewLabel = () => {
     switch (detectedType) {
-      case 'litegraph':
+      case 'nodal-ui':
         return 'Workflow JSON';
       case 'generative-ui':
         return 'Generative UI';
@@ -392,54 +392,7 @@ function AutoonApp() {
 
   return (
     <div className="h-screen flex flex-col dark" data-theme="dark" style={{ backgroundColor: 'var(--color-bg-base)' }}>
-      {/* Header */}
-      <nav className="autoon-header flex items-center justify-between" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
-        <a href="/" className="flex items-center gap-3">
-          <div className="logo-container w-8 h-8">
-            <div className="logo-glow-ring" />
-            <svg viewBox="0 0 32 32" className="w-8 h-8 logo-svg">
-              <defs>
-                <linearGradient id="headerHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2D3748"/>
-                  <stop offset="100%" stopColor="#1A202C"/>
-                </linearGradient>
-                <linearGradient id="headerStrokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00D4FF"/>
-                  <stop offset="50%" stopColor="#7C3AED"/>
-                  <stop offset="100%" stopColor="#F472B6"/>
-                </linearGradient>
-                <radialGradient id="headerNodeGrad" cx="30%" cy="30%">
-                  <stop offset="0%" stopColor="#FFF"/>
-                  <stop offset="50%" stopColor="#FFD700"/>
-                  <stop offset="100%" stopColor="#FF8C00"/>
-                </radialGradient>
-              </defs>
-              <polygon
-                points="16,5 25,10 25,22 16,27 7,22 7,10"
-                fill="url(#headerHexGrad)"
-                stroke="url(#headerStrokeGrad)"
-                strokeWidth="1.5"
-              />
-              <circle cx="16" cy="5" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-1"/>
-              <circle cx="25" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-2"/>
-              <circle cx="7" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-3"/>
-            </svg>
-          </div>
-          <span className="text-xl font-semibold" style={{ color: 'var(--color-brand-primary)' }}>
-            Autoon
-          </span>
-          <Badge color="warning">v0.2</Badge>
-        </a>
-        <a
-          href="https://github.com/or13/autoon"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="autoon-btn"
-        >
-          <HiExternalLink className="w-4 h-4 mr-2" />
-          GitHub
-        </a>
-      </nav>
+      <Header />
 
       {/* Main content - 2 panels */}
       <main ref={containerRef} className="flex-1 flex overflow-hidden">
