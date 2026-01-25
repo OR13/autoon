@@ -1,5 +1,5 @@
 {
-  "$schema": "https://autoon.dev/schemas/json-render.json",
+  "$schema": "https://autoon.dev/schemas/generative-ui.json",
   "type": "form",
   "title": "Contact Form",
   "description": "Get in touch with us",

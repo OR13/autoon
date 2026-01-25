@@ -1,7 +1,7 @@
 import { encode } from '@toon-format/toon';
 
 // Example categories
-export type ExampleCategory = 'schema' | 'instance' | 'jsonrender' | 'litegraph';
+export type ExampleCategory = 'schema' | 'instance' | 'generative-ui' | 'litegraph';
 
 // Schema graph type for GraphEditor
 export interface SchemaGraphNode {
@@ -128,7 +128,7 @@ const productInstanceJson = {
 };
 
 // ============================================
-// JSON Render Examples (Vercel AI UI Components)
+// Generative UI Examples (Vercel AI UI Components)
 // ============================================
 
 const dashboardRenderJson = {
@@ -392,18 +392,18 @@ export const EXAMPLES: Example[] = [
     toon: encode(productInstanceJson),
     json: productInstanceJson,
   },
-  // JSON Render examples
+  // Generative UI examples
   {
     id: 'dashboard-render',
     name: 'Dashboard UI',
-    category: 'jsonrender',
+    category: 'generative-ui',
     toon: encode(dashboardRenderJson),
     json: dashboardRenderJson,
   },
   {
     id: 'form-render',
     name: 'Contact Form',
-    category: 'jsonrender',
+    category: 'generative-ui',
     toon: encode(formRenderJson),
     json: formRenderJson,
   },
@@ -427,7 +427,7 @@ export const EXAMPLES: Example[] = [
 export const EXAMPLE_CATEGORIES: { id: ExampleCategory; name: string }[] = [
   { id: 'schema', name: 'JSON Schema' },
   { id: 'instance', name: 'JSON Instance' },
-  { id: 'jsonrender', name: 'JSON Render' },
+  { id: 'generative-ui', name: 'Generative UI' },
   { id: 'litegraph', name: 'LiteGraph' },
 ];
 
@@ -443,9 +443,9 @@ export function detectJsonType(json: Record<string, unknown>): ExampleCategory {
     return 'litegraph';
   }
 
-  // Check for JSON Render format
+  // Check for Generative UI format
   if (json.type && json.props && typeof json.type === 'string') {
-    return 'jsonrender';
+    return 'generative-ui';
   }
 
   // Check for JSON Schema

@@ -2,15 +2,15 @@
 
 import React from 'react';
 
-export interface JsonRenderComponent {
+export interface GenerativeUIComponent {
   type: string;
   props?: Record<string, unknown>;
-  children?: JsonRenderComponent[];
+  children?: GenerativeUIComponent[];
   visible?: unknown;
 }
 
-interface JsonRenderPreviewProps {
-  json: JsonRenderComponent | null;
+interface GenerativeUIPreviewProps {
+  json: GenerativeUIComponent | null;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -20,8 +20,8 @@ const str = (value: unknown): string => (typeof value === 'string' ? value : Str
 const num = (value: unknown): number => (typeof value === 'number' ? value : Number(value) || 0);
 const bool = (value: unknown): boolean => Boolean(value);
 
-// Simple component renderer for json-render format
-function renderComponent(component: JsonRenderComponent, key: number | string = 0): React.ReactNode {
+// Simple component renderer for generative UI format
+function renderComponent(component: GenerativeUIComponent, key: number | string = 0): React.ReactNode {
   const { type, props = {}, children } = component;
 
   const renderChildren = (): React.ReactNode => {
@@ -238,18 +238,20 @@ function renderComponent(component: JsonRenderComponent, key: number | string = 
   }
 }
 
-export default function JsonRenderPreview({ json, className, style }: JsonRenderPreviewProps) {
+export default function GenerativeUIPreview({ json, className, style }: GenerativeUIPreviewProps) {
   if (!json) {
     return (
       <div className={`flex items-center justify-center h-full text-gray-500 ${className || ''}`} style={style}>
-        No JSON Render data to preview
+        No Generative UI data to preview
       </div>
     );
   }
 
   return (
-    <div className={`p-4 overflow-auto ${className || ''}`} style={style}>
-      <div className="max-w-lg mx-auto">{renderComponent(json)}</div>
+    <div className={`overflow-auto ${className || ''}`} style={style}>
+      <div className="max-w-xl mx-auto" style={{ padding: '48px 32px' }}>
+        {renderComponent(json)}
+      </div>
     </div>
   );
 }

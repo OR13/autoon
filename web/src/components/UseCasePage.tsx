@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Button, Badge } from 'flowbite-react';
 import { HiExternalLink, HiCode, HiChartBar, HiTemplate, HiCube, HiHome } from 'react-icons/hi';
@@ -11,9 +11,21 @@ import {
   ExampleCategory,
 } from '@/lib/examples';
 
+// Estimate token count (rough approximation)
+function estimateTokens(text: string): number {
+  if (!text) return 0;
+  const tokens = text.match(/[\w]+|[^\s\w]/g);
+  return tokens ? tokens.length : 0;
+}
+
+// Format number with commas
+function formatNumber(n: number): string {
+  return n.toLocaleString();
+}
+
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false });
 const JsonCrackViewer = dynamic(() => import('@/components/JsonCrackViewer'), { ssr: false });
-const JsonRenderPreview = dynamic(() => import('@/components/JsonRenderPreview'), { ssr: false });
+const GenerativeUIPreview = dynamic(() => import('@/components/GenerativeUIPreview'), { ssr: false });
 const LiteGraphViewer = dynamic(() => import('@/components/LiteGraphViewer'), { ssr: false });
 
 type ViewTab = 'json' | 'visualization' | 'preview';
@@ -92,9 +104,9 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
 
       case 'visualization':
         // Show specialized visualizations based on category
-        if (category === 'jsonrender') {
+        if (category === 'generative-ui') {
           return (
-            <JsonRenderPreview
+            <GenerativeUIPreview
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               json={jsonContent as any}
               className="h-full bg-gray-900"
@@ -114,9 +126,9 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
         return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
 
       case 'preview':
-        if (category === 'jsonrender') {
+        if (category === 'generative-ui') {
           return (
-            <JsonRenderPreview
+            <GenerativeUIPreview
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               json={jsonContent as any}
               className="h-full bg-gray-900"
@@ -157,7 +169,7 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
       case 'visualization':
         // Show context-specific icon based on category
         if (category === 'litegraph') return <HiCube className="w-4 h-4" />;
-        if (category === 'jsonrender') return <HiTemplate className="w-4 h-4" />;
+        if (category === 'generative-ui') return <HiTemplate className="w-4 h-4" />;
         return <HiChartBar className="w-4 h-4" />;
       case 'preview':
         if (category === 'litegraph') return <HiCube className="w-4 h-4" />;
@@ -169,8 +181,8 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
     switch (category) {
       case 'litegraph':
         return 'Workflow JSON';
-      case 'jsonrender':
-        return 'UI Preview';
+      case 'generative-ui':
+        return 'Generative UI';
       default:
         return 'Visualize';
     }
@@ -180,8 +192,8 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
     switch (category) {
       case 'litegraph':
         return 'Workflow JSON';
-      case 'jsonrender':
-        return 'UI Preview';
+      case 'generative-ui':
+        return 'Generative UI';
       default:
         return 'Preview';
     }
@@ -191,7 +203,7 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
     switch (category) {
       case 'litegraph':
         return 'purple';
-      case 'jsonrender':
+      case 'generative-ui':
         return 'blue';
       case 'schema':
         return 'yellow';
@@ -199,6 +211,23 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
         return 'green';
     }
   };
+
+  // Calculate stats for TOON and JSON
+  const jsonString = jsonContent ? JSON.stringify(jsonContent, null, 2) : '';
+  const toonStats = useMemo(() => ({
+    chars: toonContent.length,
+    tokens: estimateTokens(toonContent),
+  }), [toonContent]);
+
+  const jsonStats = useMemo(() => ({
+    chars: jsonString.length,
+    tokens: estimateTokens(jsonString),
+  }), [jsonString]);
+
+  const percentChange = useMemo(() => {
+    if (jsonStats.chars === 0) return 0;
+    return ((toonStats.chars - jsonStats.chars) / jsonStats.chars) * 100;
+  }, [toonStats.chars, jsonStats.chars]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-950 dark" data-theme="dark">
@@ -293,6 +322,23 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
             <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Toon</span>
             <span className="ml-2 text-xs text-gray-600">({selectedExample.name})</span>
           </div>
+          {/* TOON Stats Bar */}
+          <div className="flex items-center gap-4 h-10 px-4 bg-gray-800/50 border-b border-gray-800 text-xs font-mono text-gray-500">
+            <span>TOON</span>
+            <span className="text-gray-600">|</span>
+            <span>{formatNumber(toonStats.chars)} chars</span>
+            <span>{formatNumber(toonStats.tokens)} tokens</span>
+            {jsonStats.chars > 0 && (
+              <span
+                style={{
+                  color: percentChange <= 0 ? '#95D660' : '#FF6B6B',
+                  fontWeight: 500
+                }}
+              >
+                {percentChange <= 0 ? '' : '+'}{percentChange.toFixed(1)}%
+              </span>
+            )}
+          </div>
           <div className="flex-1 overflow-hidden">
             <CodeEditor
               value={toonContent}
@@ -313,40 +359,51 @@ function UseCasePageContent({ category, title, description, mediaType }: UseCase
 
         {/* Right Panel - Tabbed Views */}
         <div className="flex-1 flex flex-col bg-gray-900">
-          <div className="flex items-center h-10 px-4 bg-gray-900 border-b border-gray-800 gap-1">
-            <button
-              onClick={() => setActiveTab('json')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'json'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
-            >
-              {getTabIcon('json')}
-              JSON
-            </button>
-            <button
-              onClick={() => setActiveTab('visualization')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'visualization'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
-            >
-              {getTabIcon('visualization')}
-              {getVisualizationLabel()}
-            </button>
-            <button
-              onClick={() => setActiveTab('preview')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                activeTab === 'preview'
-                  ? 'bg-gray-700 text-yellow-400'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-              }`}
-            >
-              {getTabIcon('preview')}
-              {getPreviewLabel()}
-            </button>
+          <div className="flex items-center justify-between h-10 px-4 bg-gray-900 border-b border-gray-800">
+            {/* Stats - on left */}
+            <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
+              <span>JSON</span>
+              <span className="text-gray-600">|</span>
+              <span>{formatNumber(jsonStats.chars)} chars</span>
+              <span>{formatNumber(jsonStats.tokens)} tokens</span>
+            </div>
+
+            {/* Tabs - on right */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveTab('json')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'json'
+                    ? 'bg-gray-700 text-yellow-400'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                }`}
+              >
+                {getTabIcon('json')}
+                JSON
+              </button>
+              <button
+                onClick={() => setActiveTab('visualization')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'visualization'
+                    ? 'bg-gray-700 text-yellow-400'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                }`}
+              >
+                {getTabIcon('visualization')}
+                {getVisualizationLabel()}
+              </button>
+              <button
+                onClick={() => setActiveTab('preview')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                  activeTab === 'preview'
+                    ? 'bg-gray-700 text-yellow-400'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                }`}
+              >
+                {getTabIcon('preview')}
+                {getPreviewLabel()}
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-hidden">{renderPreviewContent()}</div>
