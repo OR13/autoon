@@ -8,69 +8,69 @@ import { createTheme } from '@uiw/codemirror-themes';
 import { tags as t } from '@lezer/highlight';
 import { toon } from '@/lib/toon-language';
 
-// Ayu Mirage theme for CodeMirror 6
-const ayuMirageTheme = createTheme({
+// Golden Dark theme for CodeMirror 6 - matches Autoon gold & dark grey theme
+const goldenDarkTheme = createTheme({
   theme: 'dark',
   settings: {
-    background: '#1f2430',
-    foreground: '#cbccc6',
-    caret: '#ffcc66',
-    selection: '#34455a',
-    selectionMatch: '#34455a',
-    lineHighlight: '#191e2a',
-    gutterBackground: '#1f2430',
-    gutterForeground: '#5c6773',
+    background: '#0A0A0A',           // near black base
+    foreground: '#E5E5E5',           // light grey text
+    caret: '#F7C974',                 // gold caret
+    selection: '#1A1A1A',             // dark grey selection
+    selectionMatch: '#242424',        // slightly lighter for matches
+    lineHighlight: '#141414',        // dark grey line highlight
+    gutterBackground: '#0A0A0A',     // near black gutter
+    gutterForeground: '#666666',     // muted grey line numbers
     gutterBorder: 'transparent',
   },
   styles: [
-    // Comments
-    { tag: t.comment, color: '#5c6773', fontStyle: 'italic' },
-    { tag: t.lineComment, color: '#5c6773', fontStyle: 'italic' },
-    { tag: t.blockComment, color: '#5c6773', fontStyle: 'italic' },
-    { tag: t.docComment, color: '#5c6773', fontStyle: 'italic' },
+    // Comments - muted grey
+    { tag: t.comment, color: '#666666', fontStyle: 'italic' },
+    { tag: t.lineComment, color: '#666666', fontStyle: 'italic' },
+    { tag: t.blockComment, color: '#666666', fontStyle: 'italic' },
+    { tag: t.docComment, color: '#666666', fontStyle: 'italic' },
     
-    // Strings
-    { tag: t.string, color: '#bae67e' },
-    { tag: t.special(t.string), color: '#d4bfff' }, // UUIDs, emails - purple tint
+    // Strings - light gold/green tint
+    { tag: t.string, color: '#E8D5A3' }, // warm light gold
+    { tag: t.special(t.string), color: '#FFE55C' }, // bright gold for special strings
     
-    // Literals
-    { tag: t.number, color: '#ffcc66' },
-    { tag: t.bool, color: '#ffae57' }, // Orange for booleans
-    { tag: t.null, color: '#f28779' }, // Coral for null
+    // Literals - gold accents
+    { tag: t.number, color: '#F7C974' }, // gold numbers
+    { tag: t.bool, color: '#FFD700' }, // bright gold for booleans
+    { tag: t.null, color: '#B85C5C' }, // muted red for null
     
-    // Keywords & Types
-    { tag: t.keyword, color: '#ffa759', fontWeight: 'bold' }, // Section names bold
-    { tag: t.typeName, color: '#73d0ff' }, // Type names like string, object, array
-    { tag: t.className, color: '#73d0ff' },
-    { tag: t.definition(t.typeName), color: '#73d0ff' },
+    // Keywords & Types - gold primary
+    { tag: t.keyword, color: '#F7C974', fontWeight: 'bold' }, // gold keywords
+    { tag: t.typeName, color: '#FFD700' }, // bright gold for types
+    { tag: t.className, color: '#FFD700' },
+    { tag: t.definition(t.typeName), color: '#FFD700' },
     
-    // Properties & Attributes
-    { tag: t.propertyName, color: '#5ccfe6' }, // Field names in headers
-    { tag: t.definition(t.propertyName), color: '#5ccfe6' },
-    { tag: t.attributeName, color: '#ffd580' },
-    { tag: t.attributeValue, color: '#bae67e' },
+    // Properties & Attributes - gold variations
+    { tag: t.propertyName, color: '#FFE55C' }, // light gold for properties
+    { tag: t.definition(t.propertyName), color: '#FFE55C' },
+    { tag: t.attributeName, color: '#F7C974' }, // gold attributes
+    { tag: t.attributeValue, color: '#E8D5A3' }, // warm gold values
     
-    // Special values
-    { tag: t.atom, color: '#d4bfff' }, // Enum values (pipe-separated)
-    { tag: t.url, color: '#95e6cb', textDecoration: 'underline' }, // URLs - teal underlined
-    { tag: t.regexp, color: '#f29e74' }, // Regex patterns - orange
+    // Special values - gold and accent colors
+    { tag: t.atom, color: '#FFE55C' }, // bright gold for atoms
+    { tag: t.url, color: '#E8943A', textDecoration: 'underline' }, // golden red for URLs
+    { tag: t.regexp, color: '#FF8C42' }, // orange for regex
     
-    // Brackets & Punctuation
-    { tag: t.squareBracket, color: '#ffd580' }, // Array count brackets [N] - gold
-    { tag: t.brace, color: '#ff9f7e' }, // Field braces {fields} - peach
-    { tag: t.punctuation, color: '#707a8c' }, // Commas, colons - dimmed
-    { tag: t.paren, color: '#cbccc6' },
-    { tag: t.angleBracket, color: '#cbccc6' },
-    { tag: t.derefOperator, color: '#cbccc6' },
-    { tag: t.separator, color: '#707a8c' },
+    // Brackets & Punctuation - gold accents
+    { tag: t.squareBracket, color: '#F7C974' }, // gold brackets
+    { tag: t.brace, color: '#F7C974' }, // gold braces
+    { tag: t.punctuation, color: '#999999' }, // muted grey punctuation
+    { tag: t.paren, color: '#CCCCCC' }, // light grey parens
+    { tag: t.angleBracket, color: '#CCCCCC' },
+    { tag: t.derefOperator, color: '#CCCCCC' },
+    { tag: t.separator, color: '#999999' },
     
-    // Variables & Functions
-    { tag: t.variableName, color: '#cbccc6' },
-    { tag: t.definition(t.variableName), color: '#cbccc6' },
-    { tag: t.function(t.variableName), color: '#ffd580' },
-    { tag: t.function(t.propertyName), color: '#ffd580' },
-    { tag: t.operator, color: '#f29e74' },
-    { tag: t.tagName, color: '#5ccfe6' },
+    // Variables & Functions - neutral with gold accents
+    { tag: t.variableName, color: '#E5E5E5' }, // light grey variables
+    { tag: t.definition(t.variableName), color: '#E5E5E5' },
+    { tag: t.function(t.variableName), color: '#F7C974' }, // gold functions
+    { tag: t.function(t.propertyName), color: '#F7C974' },
+    { tag: t.operator, color: '#FFD700' }, // bright gold operators
+    { tag: t.tagName, color: '#FFE55C' }, // light gold tags
   ],
 });
 
@@ -120,7 +120,7 @@ export default function CodeEditor({
     const extensions = [
       basicSetup,
       getLanguageExtension(),
-      ayuMirageTheme,
+      goldenDarkTheme,
       EditorView.lineWrapping,
       EditorView.theme({
         '&': {

@@ -33,13 +33,30 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
     case 'Card': {
       const title = props.title ? str(props.title) : null;
       return (
-        <div key={key} className="bg-gray-800 rounded-lg p-4 border border-gray-700 shadow-lg">
+        <div
+          key={key}
+          style={{
+            backgroundColor: 'var(--color-bg-elevated)',
+            borderRadius: '8px',
+            padding: '20px',
+            border: '1px solid var(--color-border-muted)',
+          }}
+        >
           {title && (
-            <h2 className="text-lg font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <h2
+              style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                marginBottom: '16px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid var(--color-border-muted)',
+              }}
+            >
               {title}
             </h2>
           )}
-          <div className="space-y-3">{renderChildren()}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>{renderChildren()}</div>
         </div>
       );
     }
@@ -49,16 +66,46 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       const value = str(props.value);
       const trend = props.trend ? str(props.trend) : null;
       return (
-        <div key={key} className="bg-gray-700/50 rounded-lg p-3 flex items-center justify-between">
+        <div
+          key={key}
+          style={{
+            backgroundColor: 'var(--color-bg-muted)',
+            borderRadius: '6px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
-            <p className="text-xl font-bold text-white">{value}</p>
+            <p
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '4px',
+              }}
+            >
+              {label}
+            </p>
+            <p
+              style={{
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              {value}
+            </p>
           </div>
           {trend && (
             <span
-              className={`text-sm font-medium ${
-                trend.startsWith('+') ? 'text-green-400' : 'text-red-400'
-              }`}
+              style={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: trend.startsWith('+') ? '#95D660' : '#FF6B6B',
+              }}
             >
               {trend}
             </span>
@@ -75,15 +122,40 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       }>;
       const maxValue = Math.max(...data.map((d) => d.value), 1);
       return (
-        <div key={key} className="bg-gray-700/30 rounded-lg p-3">
-          <div className="flex items-end gap-2 h-32">
+        <div
+          key={key}
+          style={{
+            backgroundColor: 'var(--color-bg-muted)',
+            borderRadius: '6px',
+            padding: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '120px' }}>
             {data.map((item, idx) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                key={idx}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                  height: '100%',
+                  justifyContent: 'flex-end',
+                }}
+              >
                 <div
-                  className="w-full bg-yellow-500 rounded-t transition-all"
-                  style={{ height: `${(item.value / maxValue) * 100}%` }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'var(--color-brand-primary)',
+                    borderRadius: '4px 4px 0 0',
+                    height: `${(item.value / maxValue) * 100}%`,
+                    minHeight: '4px',
+                  }}
                 />
-                <span className="text-xs text-gray-400">{item.month || item.label}</span>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                  {item.month || item.label}
+                </span>
               </div>
             ))}
           </div>
@@ -92,37 +164,56 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
     }
 
     case 'Alert': {
-      const variantStyles: Record<string, string> = {
-        success: 'bg-green-900/50 border-green-700 text-green-300',
-        warning: 'bg-yellow-900/50 border-yellow-700 text-yellow-300',
-        error: 'bg-red-900/50 border-red-700 text-red-300',
-        info: 'bg-blue-900/50 border-blue-700 text-blue-300',
+      const variantStyles: Record<string, { bg: string; border: string; text: string }> = {
+        success: { bg: 'rgba(149, 214, 96, 0.1)', border: 'rgba(149, 214, 96, 0.3)', text: '#95D660' },
+        warning: { bg: 'rgba(255, 215, 0, 0.1)', border: 'rgba(255, 215, 0, 0.3)', text: '#FFD700' },
+        error: { bg: 'rgba(255, 107, 107, 0.1)', border: 'rgba(255, 107, 107, 0.3)', text: '#FF6B6B' },
+        info: { bg: 'rgba(115, 208, 255, 0.1)', border: 'rgba(115, 208, 255, 0.3)', text: '#73D0FF' },
       };
       const variant = str(props.variant) || 'info';
       const message = str(props.message);
+      const styles = variantStyles[variant] || variantStyles.info;
       return (
-        <div key={key} className={`rounded-lg p-3 border ${variantStyles[variant] || variantStyles.info}`}>
+        <div
+          key={key}
+          style={{
+            borderRadius: '6px',
+            padding: '12px 16px',
+            backgroundColor: styles.bg,
+            border: `1px solid ${styles.border}`,
+            color: styles.text,
+            fontSize: '14px',
+          }}
+        >
           {message}
         </div>
       );
     }
 
     case 'Button': {
-      const btnVariants: Record<string, string> = {
-        primary: 'bg-yellow-500 hover:bg-yellow-600 text-gray-900',
-        secondary: 'bg-gray-600 hover:bg-gray-500 text-white',
-        danger: 'bg-red-600 hover:bg-red-500 text-white',
+      const btnVariants: Record<string, { bg: string; hover: string; text: string }> = {
+        primary: { bg: 'var(--color-brand-primary)', hover: 'var(--color-brand-secondary)', text: '#1a0f0a' },
+        secondary: { bg: 'var(--color-bg-muted)', hover: 'var(--color-bg-elevated)', text: 'var(--color-text-primary)' },
+        danger: { bg: '#FF6B6B', hover: '#ff5252', text: '#fff' },
       };
       const btnVariant = str(props.variant) || 'secondary';
       const label = str(props.label);
-      const btnType = (str(props.type) as 'button' | 'submit' | 'reset') || 'button';
+      const styles = btnVariants[btnVariant] || btnVariants.secondary;
       return (
         <button
           key={key}
-          type={btnType}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            btnVariants[btnVariant] || btnVariants.secondary
-          }`}
+          type="button"
+          style={{
+            padding: '10px 20px',
+            borderRadius: '6px',
+            fontWeight: 500,
+            fontSize: '14px',
+            backgroundColor: styles.bg,
+            color: styles.text,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
         >
           {label}
         </button>
@@ -132,13 +223,30 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
     case 'Form': {
       const title = props.title ? str(props.title) : null;
       return (
-        <div key={key} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+        <div
+          key={key}
+          style={{
+            backgroundColor: 'var(--color-bg-elevated)',
+            borderRadius: '8px',
+            padding: '20px',
+            border: '1px solid var(--color-border-muted)',
+          }}
+        >
           {title && (
-            <h2 className="text-lg font-semibold text-white mb-4 pb-2 border-b border-gray-700">
+            <h2
+              style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                marginBottom: '16px',
+                paddingBottom: '12px',
+                borderBottom: '1px solid var(--color-border-muted)',
+              }}
+            >
               {title}
             </h2>
           )}
-          <div className="space-y-4">{renderChildren()}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>{renderChildren()}</div>
         </div>
       );
     }
@@ -150,16 +258,25 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       const placeholder = str(props.placeholder);
       const required = bool(props.required);
       return (
-        <div key={key} className="space-y-1">
-          <label className="block text-sm text-gray-400">
+        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {label}
-            {required && <span className="text-red-400 ml-1">*</span>}
+            {required && <span style={{ color: '#FF6B6B', marginLeft: '4px' }}>*</span>}
           </label>
           <input
             type={inputType}
             name={name}
             placeholder={placeholder}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              backgroundColor: 'var(--color-bg-muted)',
+              border: '1px solid var(--color-border-default)',
+              borderRadius: '6px',
+              color: 'var(--color-text-primary)',
+              fontSize: '14px',
+              outline: 'none',
+            }}
           />
         </div>
       );
@@ -172,16 +289,26 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       const placeholder = str(props.placeholder);
       const required = bool(props.required);
       return (
-        <div key={key} className="space-y-1">
-          <label className="block text-sm text-gray-400">
+        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {label}
-            {required && <span className="text-red-400 ml-1">*</span>}
+            {required && <span style={{ color: '#FF6B6B', marginLeft: '4px' }}>*</span>}
           </label>
           <textarea
             name={name}
             rows={rows}
             placeholder={placeholder}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              backgroundColor: 'var(--color-bg-muted)',
+              border: '1px solid var(--color-border-default)',
+              borderRadius: '6px',
+              color: 'var(--color-text-primary)',
+              fontSize: '14px',
+              outline: 'none',
+              resize: 'none',
+            }}
           />
         </div>
       );
@@ -193,14 +320,23 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       const options = (Array.isArray(props.options) ? props.options : []) as string[];
       const required = bool(props.required);
       return (
-        <div key={key} className="space-y-1">
-          <label className="block text-sm text-gray-400">
+        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {label}
-            {required && <span className="text-red-400 ml-1">*</span>}
+            {required && <span style={{ color: '#FF6B6B', marginLeft: '4px' }}>*</span>}
           </label>
           <select
             name={name}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              backgroundColor: 'var(--color-bg-muted)',
+              border: '1px solid var(--color-border-default)',
+              borderRadius: '6px',
+              color: 'var(--color-text-primary)',
+              fontSize: '14px',
+              outline: 'none',
+            }}
           >
             <option value="">Select...</option>
             {options.map((opt, idx) => (
@@ -217,20 +353,33 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
       const label = str(props.label);
       const name = str(props.name);
       return (
-        <div key={key} className="flex items-center gap-2">
+        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <input
             type="checkbox"
             name={name}
-            className="w-4 h-4 bg-gray-700 border-gray-600 rounded text-yellow-500 focus:ring-yellow-500/50"
+            style={{
+              width: '16px',
+              height: '16px',
+              accentColor: 'var(--color-brand-primary)',
+            }}
           />
-          <label className="text-sm text-gray-300">{label}</label>
+          <label style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>{label}</label>
         </div>
       );
     }
 
     default:
       return (
-        <div key={key} className="bg-gray-700/30 rounded p-2 text-sm text-gray-400">
+        <div
+          key={key}
+          style={{
+            backgroundColor: 'var(--color-bg-muted)',
+            borderRadius: '6px',
+            padding: '12px',
+            fontSize: '13px',
+            color: 'var(--color-text-muted)',
+          }}
+        >
           Unknown component: {type}
           {renderChildren()}
         </div>
@@ -241,15 +390,25 @@ function renderComponent(component: GenerativeUIComponent, key: number | string 
 export default function GenerativeUIPreview({ json, className, style }: GenerativeUIPreviewProps) {
   if (!json) {
     return (
-      <div className={`flex items-center justify-center h-full text-gray-500 ${className || ''}`} style={style}>
+      <div
+        className={className || ''}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          color: 'var(--color-text-muted)',
+          ...style,
+        }}
+      >
         No Generative UI data to preview
       </div>
     );
   }
 
   return (
-    <div className={`overflow-auto ${className || ''}`} style={style}>
-      <div className="max-w-xl mx-auto" style={{ padding: '48px 32px' }}>
+    <div className={className || ''} style={{ overflow: 'auto', ...style }}>
+      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '32px' }}>
         {renderComponent(json)}
       </div>
     </div>

@@ -15,6 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Autoon – Model with TOON',
   description: 'Model class, instance, process and workflow using TOON format. Visualize, validate, and share.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

@@ -3,66 +3,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { HiArrowsExpand } from 'react-icons/hi';
 
-// Ayu Mirage Theme Colors
-const THEME = {
-  // Backgrounds
-  bgBase: '#1F2430',
-  bgSurface: '#232834',
-  bgElevated: '#2D3441',
-  bgMuted: '#3D4455',
-  // Borders
-  borderDefault: '#2D3441',
-  borderMuted: '#3D4455',
-  // Text
-  textPrimary: '#CBCCC6',
-  textSecondary: '#B8B4A8',
-  textMuted: '#707A8C',
-  textSubtle: '#5C6773',
-  // Subtle accent palette for node borders (muted versions)
-  accentsMuted: [
-    '#8C7555', // muted orange
-    '#8C8055', // muted yellow
-    '#6B8C55', // muted green
-    '#558C80', // muted cyan
-    '#557C8C', // muted blue
-    '#6B558C', // muted purple
-    '#8C5560', // muted pink
-  ],
-};
-
-// Canvas background color (matches CodeMirror background)
-const CANVAS_BG = '#1f2430';
-
-// Generate a consistent color index from a string (hash-based)
-function getColorIndex(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash) % THEME.accentsMuted.length;
-}
-
-// Get muted accent color for node borders
-function getAccentColor(type: string): string {
-  return THEME.accentsMuted[getColorIndex(type)];
-}
-
-// Generate dark background color for nodes
-function getNodeBgColor(type: string): string {
-  const colorIndex = getColorIndex(type);
-  // Very dark backgrounds for good text contrast
-  const bgColors = [
-    '#1E1A16', // dark orange bg
-    '#1E1C16', // dark yellow bg
-    '#181E16', // dark green bg
-    '#161E1C', // dark cyan bg
-    '#161A1E', // dark blue bg
-    '#1A161E', // dark purple bg
-    '#1E161A', // dark pink bg
-  ];
-  return bgColors[colorIndex];
-}
-
 interface LiteGraphNode {
   id: number | string;
   type: string;
@@ -103,7 +43,6 @@ export default function LiteGraphViewer({ json, className }: LiteGraphViewerProp
   const graphRef = useRef<InstanceType<typeof import('litegraph.js').LGraph> | null>(null);
   const graphCanvasRef = useRef<InstanceType<typeof import('litegraph.js').LGraphCanvas> | null>(null);
   const LiteGraphRef = useRef<typeof import('litegraph.js') | null>(null);
-  const linkTypesRef = useRef<Set<string>>(new Set());
 
   const loadLiteGraphData = useCallback((data: LiteGraphJson) => {
     const LiteGraph = LiteGraphRef.current;
@@ -113,44 +52,22 @@ export default function LiteGraphViewer({ json, className }: LiteGraphViewerProp
     if (!LiteGraph || !lgGraph || !graphCanvas || !data) return;
 
     lgGraph.clear();
-    linkTypesRef.current.clear();
     const nodeIdMap: Record<string | number, number> = {};
-
-    // Collect all unique link types for color assignment
-    data.links.forEach((link) => {
-      if (link.type) {
-        linkTypesRef.current.add(link.type);
-      }
-    });
-
-    // Register link type colors dynamically using theme accents
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lg = LiteGraph.LiteGraph as any;
-    linkTypesRef.current.forEach((type) => {
-      lg.link_type_colors = lg.link_type_colors || {};
-      lg.link_type_colors[type] = getAccentColor(type);
-    });
 
     // Add nodes
     data.nodes.forEach((node) => {
-      // Create a generic node
       const lgNode = new LiteGraph.LGraphNode();
-      lgNode.title = node.title || node.type;
+      // Add space prefix for visual padding since LiteGraph doesn't support title padding
+      lgNode.title = '  ' + (node.title || node.type);
       lgNode.pos = [...node.pos] as [number, number];
-      lgNode.size = node.size ? [...node.size] as [number, number] : [200, 80];
-      
-      // Assign colors based on node type
-      lgNode.color = getAccentColor(node.type);
-      lgNode.bgcolor = getNodeBgColor(node.type);
+      lgNode.size = node.size ? [...node.size] as [number, number] : [220, 80];
 
-      // Add inputs
       if (node.inputs) {
         node.inputs.forEach((input) => {
           lgNode.addInput(input.name, input.type);
         });
       }
 
-      // Add outputs
       if (node.outputs) {
         node.outputs.forEach((output) => {
           lgNode.addOutput(output.name, output.type);
@@ -196,46 +113,36 @@ export default function LiteGraphViewer({ json, className }: LiteGraphViewerProp
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gc = graphCanvas as any;
-      
-      // Canvas background
+
+      // Dark theme with good contrast
       gc.background_image = null;
-      gc.clear_background_color = CANVAS_BG;
-      
-      // Connection styling - no borders or shadows
+      gc.clear_background_color = '#0A0A0A';
       gc.render_shadows = false;
       gc.render_curved_connections = true;
-      gc.connections_width = 1.5;
-      gc.default_link_color = THEME.textSubtle;
-      gc.render_connections_border = false;
-      gc.connections_shadow = false;
-      gc.links_shadow_color = CANVAS_BG;
-      gc.default_connection_color_byType = {};
-      
-      // Link colors
-      LiteGraph.LiteGraph.CONNECTING_LINK_COLOR = THEME.textSubtle;
-      LiteGraph.LiteGraph.LINK_COLOR = THEME.textSubtle;
-      LiteGraph.LiteGraph.EVENT_LINK_COLOR = THEME.textSubtle;
-      
-      // Node styling
-      gc.node_title_color = THEME.textPrimary;
-      gc.default_connection_color = THEME.textMuted;
-      
-      // Rendering quality
+      gc.connections_width = 3;
       gc.highquality_render = true;
-      gc.editor_alpha = 1;
-      
-      // Configure default node colors for good contrast
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const lgConfig = LiteGraph.LiteGraph as any;
-      lgConfig.NODE_DEFAULT_COLOR = THEME.textMuted;
-      lgConfig.NODE_DEFAULT_BGCOLOR = '#1A1D24';
-      lgConfig.NODE_DEFAULT_BOXCOLOR = THEME.borderDefault;
-      lgConfig.NODE_TITLE_COLOR = THEME.textPrimary;
-      lgConfig.NODE_TEXT_COLOR = THEME.textPrimary;
-      lgConfig.NODE_SELECTED_TITLE_COLOR = THEME.textPrimary;
+
+      // Node colors - dark theme with gold accents
+      lgConfig.NODE_DEFAULT_COLOR = '#2A2418';
+      lgConfig.NODE_DEFAULT_BGCOLOR = '#1A1A1A';
+      lgConfig.NODE_DEFAULT_BOXCOLOR = '#3D3528';
+      lgConfig.NODE_TITLE_COLOR = '#F7C974';
+      lgConfig.NODE_TEXT_COLOR = '#E0E0E0';
+      lgConfig.NODE_SELECTED_TITLE_COLOR = '#FFD700';
       lgConfig.DEFAULT_SHADOW_COLOR = 'rgba(0,0,0,0.5)';
-      lgConfig.WIDGET_BGCOLOR = '#1A1D24';
-      lgConfig.WIDGET_TEXT_COLOR = THEME.textPrimary;
+
+      // Title text padding from left edge
+      gc.title_text_font = 'bold 13px Arial';
+      gc.node_title_color = '#F7C974';
+
+
+      // Link colors - visible gold
+      lgConfig.LINK_COLOR = '#F7C974';
+      lgConfig.EVENT_LINK_COLOR = '#FFD700';
+      lgConfig.CONNECTING_LINK_COLOR = '#FFD700';
 
       const resizeCanvas = () => {
         if (canvasRef.current && containerRef.current) {
@@ -277,7 +184,7 @@ export default function LiteGraphViewer({ json, className }: LiteGraphViewerProp
 
   if (!json) {
     return (
-      <div 
+      <div
         className={`flex items-center justify-center h-full ${className || ''}`}
         style={{ color: 'var(--color-text-subtle)' }}
       >
@@ -287,22 +194,22 @@ export default function LiteGraphViewer({ json, className }: LiteGraphViewerProp
   }
 
   return (
-    <div 
+    <div
       className={`flex flex-col h-full ${className || ''}`}
       style={{ backgroundColor: 'var(--color-bg-base)' }}
     >
-      <div 
+      <div
         className="flex items-center gap-3 px-4"
-        style={{ 
+        style={{
           height: 'var(--panel-header-height)',
           backgroundColor: 'var(--color-bg-surface)',
           borderBottom: '1px solid var(--color-border-default)'
         }}
       >
-        <button 
+        <button
           onClick={handleFitView}
           className="autoon-btn"
-          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', marginLeft: '0.25rem' }}
+          style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
         >
           <HiArrowsExpand className="w-3.5 h-3.5 mr-1.5" />
           Fit

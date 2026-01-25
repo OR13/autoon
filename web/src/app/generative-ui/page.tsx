@@ -98,6 +98,7 @@ Generate a complete dashboard with key sales metrics and trends.`,
       }}
       jsonExample={jsonExample}
       toonExample={toonExample}
+      previewType="generative-ui"
     />
   );
 }

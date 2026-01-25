@@ -10,37 +10,48 @@ const jsonExample = `{
     {
       "id": 1,
       "type": "CheckpointLoaderSimple",
-      "pos": [50, 200],
-      "widgets_values": ["v1-5-pruned.safetensors"]
+      "pos": [50, 100],
+      "size": [220, 80],
+      "outputs": [
+        { "name": "MODEL", "type": "MODEL" },
+        { "name": "CLIP", "type": "CLIP" }
+      ]
     },
     {
       "id": 2,
       "type": "CLIPTextEncode",
-      "pos": [300, 100],
-      "widgets_values": ["a beautiful sunset"]
+      "pos": [320, 50],
+      "size": [200, 70],
+      "inputs": [{ "name": "clip", "type": "CLIP" }],
+      "outputs": [{ "name": "CONDITIONING", "type": "CONDITIONING" }]
     },
     {
       "id": 3,
       "type": "KSampler",
-      "pos": [550, 200],
-      "widgets_values": ["euler", 20, 8]
+      "pos": [580, 80],
+      "size": [200, 100],
+      "inputs": [
+        { "name": "model", "type": "MODEL" },
+        { "name": "positive", "type": "CONDITIONING" }
+      ],
+      "outputs": [{ "name": "LATENT", "type": "LATENT" }]
     }
   ],
   "links": [
-    [1, 1, 0, 3, 0, "MODEL"],
-    [2, 1, 1, 2, 0, "CLIP"],
-    [3, 2, 0, 3, 1, "CONDITIONING"]
+    { "id": 1, "origin_id": 1, "origin_slot": 0, "target_id": 3, "target_slot": 0, "type": "MODEL" },
+    { "id": 2, "origin_id": 1, "origin_slot": 1, "target_id": 2, "target_slot": 0, "type": "CLIP" },
+    { "id": 3, "origin_id": 2, "origin_slot": 0, "target_id": 3, "target_slot": 1, "type": "CONDITIONING" }
   ]
 }`;
 
-const toonExample = `nodes[3]{id,type,pos,widgets_values}:
-  1,CheckpointLoaderSimple,[50\\,200],[v1-5-pruned.safetensors]
-  2,CLIPTextEncode,[300\\,100],[a beautiful sunset]
-  3,KSampler,[550\\,200],[euler\\,20\\,8]
-links[3]:
-  [1,1,0,3,0,MODEL]
-  [2,1,1,2,0,CLIP]
-  [3,2,0,3,1,CONDITIONING]`;
+const toonExample = `nodes[3]{id,type,pos,size,inputs,outputs}:
+  1,CheckpointLoaderSimple,[50\\,100],[220\\,80],,[{name,type}:MODEL\\,MODEL;CLIP\\,CLIP]
+  2,CLIPTextEncode,[320\\,50],[200\\,70],[{name,type}:clip\\,CLIP],[{name,type}:CONDITIONING\\,CONDITIONING]
+  3,KSampler,[580\\,80],[200\\,100],[{name,type}:model\\,MODEL;positive\\,CONDITIONING],[{name,type}:LATENT\\,LATENT]
+links[3]{id,origin_id,origin_slot,target_id,target_slot,type}:
+  1,1,0,3,0,MODEL
+  2,1,1,2,0,CLIP
+  3,2,0,3,1,CONDITIONING`;
 
 export default function NodalUIPage() {
   return (
@@ -92,6 +103,7 @@ Output the modified workflow in the same TOON format.`,
       }}
       jsonExample={jsonExample}
       toonExample={toonExample}
+      previewType="nodal-ui"
     />
   );
 }

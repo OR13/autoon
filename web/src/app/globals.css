@@ -2,54 +2,53 @@
 @plugin "flowbite/plugin";
 
 /* ========================================
-   AUTOON THEME - Ayu Mirage
-   Based on https://github.com/ayu-theme/ayu-colors
+   AUTOON THEME - Gold & Dark Grey
    ======================================== */
 
 :root {
   color-scheme: dark;
   
-  /* Ayu Mirage - Background Colors */
-  --color-bg-base: #1F2430;            /* editor background */
-  --color-bg-surface: #232834;         /* panel background */
-  --color-bg-elevated: #2D3441;        /* elevated surfaces */
-  --color-bg-muted: #3D4455;           /* muted backgrounds */
+  /* Background Colors - Near black and dark grey */
+  --color-bg-base: #0A0A0A;            /* editor background - near black */
+  --color-bg-surface: #141414;          /* panel background - dark grey */
+  --color-bg-elevated: #1A1A1A;        /* elevated surfaces - medium dark grey */
+  --color-bg-muted: #242424;           /* muted backgrounds - lighter dark grey */
   
-  /* Ayu Mirage - Border Colors */
-  --color-border-default: #2D3441;     /* default borders */
-  --color-border-muted: #3D4455;       /* muted borders */
-  --color-border-subtle: #4D5566;      /* subtle borders */
+  /* Border Colors - Dark grey tones */
+  --color-border-default: #1A1A1A;     /* default borders */
+  --color-border-muted: #242424;       /* muted borders */
+  --color-border-subtle: #2E2E2E;      /* subtle borders */
   
-  /* Ayu Mirage - Text Colors */
-  --color-text-primary: #CBCCC6;       /* primary text */
-  --color-text-secondary: #B8B4A8;     /* secondary text */
-  --color-text-muted: #707A8C;         /* muted text */
-  --color-text-subtle: #5C6773;        /* subtle text */
+  /* Text Colors - Neutral grays */
+  --color-text-primary: #E5E5E5;       /* primary text - light grey */
+  --color-text-secondary: #CCCCCC;     /* secondary text - medium grey */
+  --color-text-muted: #999999;          /* muted text - grey */
+  --color-text-subtle: #666666;         /* subtle text - dark grey */
   
-  /* Ayu Mirage - Accent Colors (Syntax) */
-  --color-accent-orange: #FFAD66;      /* strings, constants */
-  --color-accent-yellow: #FFD173;      /* functions */
-  --color-accent-green: #D5FF80;       /* strings */
-  --color-accent-cyan: #95E6CB;        /* regex, escape */
-  --color-accent-blue: #73D0FF;        /* tags, keywords */
-  --color-accent-purple: #D4BFFF;      /* special */
-  --color-accent-pink: #F28779;        /* markup */
-  --color-accent-red: #FF6666;         /* errors */
+  /* Accent Colors */
+  --color-accent-orange: #FF8C42;      /* orange */
+  --color-accent-yellow: #F7C974;      /* gold */
+  --color-accent-green: #7CB87C;       /* green */
+  --color-accent-cyan: #5CB8B8;        /* cyan */
+  --color-accent-blue: #5C8CB8;        /* blue */
+  --color-accent-purple: #9C7A9C;      /* purple */
+  --color-accent-pink: #B87A9C;        /* pink */
+  --color-accent-red: #B85C5C;         /* red */
   
-  /* Brand Colors - Using Ayu Mirage accents */
-  --color-brand-primary: #FFAD66;      /* orange - primary brand */
-  --color-brand-secondary: #73D0FF;    /* blue - secondary */
-  --color-brand-accent: #FFD173;       /* yellow - accent */
+  /* Brand Colors - Gold primary */
+  --color-brand-primary: #F7C974;      /* gold - primary brand */
+  --color-brand-secondary: #FFD700;    /* bright gold - secondary */
+  --color-brand-accent: #FFE55C;       /* light gold - accent */
   
   /* Interactive Colors */
-  --color-interactive-hover: #2D3441;  /* hover state */
-  --color-interactive-active: #3D4455; /* active state */
+  --color-interactive-hover: #1A1A1A;  /* hover state */
+  --color-interactive-active: #242424; /* active state */
   
   /* Status Colors */
-  --color-success: #D5FF80;            /* green */
-  --color-warning: #FFD173;            /* yellow */
-  --color-error: #FF6666;              /* red */
-  --color-info: #73D0FF;               /* blue */
+  --color-success: #7CB87C;            /* green */
+  --color-warning: #F7C974;            /* gold */
+  --color-error: #B85C5C;              /* red */
+  --color-info: #5C8CB8;               /* blue */
   
   /* Spacing */
   --header-height: 3.5rem;             /* 56px */
@@ -57,22 +56,22 @@
 }
 
 /* ========================================
-   FLOWBITE THEME - Ayu Mirage Orange
+   FLOWBITE THEME - Gold
    ======================================== */
 
 @theme {
-  /* Primary - Orange (Ayu Mirage accent) */
-  --color-primary-50: #FFF8F0;
-  --color-primary-100: #FFEFD9;
-  --color-primary-200: #FFDDB3;
-  --color-primary-300: #FFCB8C;
-  --color-primary-400: #FFBC73;
-  --color-primary-500: #FFAD66;
-  --color-primary-600: #E69A5C;
-  --color-primary-700: #CC8752;
-  --color-primary-800: #B37447;
-  --color-primary-900: #99613D;
-  --color-primary-950: #664129;
+  /* Primary - Gold */
+  --color-primary-50: #FFFDF5;
+  --color-primary-100: #FFF9E6;
+  --color-primary-200: #FFF2CC;
+  --color-primary-300: #FFE99C;
+  --color-primary-400: #FFE55C;
+  --color-primary-500: #F7C974;
+  --color-primary-600: #FFD700;
+  --color-primary-700: #E6C200;
+  --color-primary-800: #CCAA00;
+  --color-primary-900: #B38F00;
+  --color-primary-950: #8B6F00;
 }
 
 /* ========================================
@@ -240,10 +239,10 @@ body {
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    rgba(0, 212, 255, 0.5) 60deg,
-    rgba(124, 58, 237, 0.5) 120deg,
-    rgba(244, 114, 182, 0.4) 180deg,
-    rgba(255, 215, 0, 0.3) 240deg,
+    rgba(247, 201, 116, 0.7) 60deg,
+    rgba(255, 215, 0, 0.6) 120deg,
+    rgba(255, 229, 92, 0.5) 180deg,
+    rgba(247, 201, 116, 0.6) 240deg,
     transparent 300deg,
     transparent 360deg
   );

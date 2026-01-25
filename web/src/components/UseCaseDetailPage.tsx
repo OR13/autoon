@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import Header from './Header';
 
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false });
+const GenerativeUIPreview = dynamic(() => import('@/components/GenerativeUIPreview'), { ssr: false });
+const LiteGraphViewer = dynamic(() => import('@/components/LiteGraphViewer'), { ssr: false });
 
 // Estimate token count
 function estimateTokens(text: string): number {
@@ -35,6 +37,7 @@ interface UseCaseDetailPageProps {
   };
   jsonExample: string;
   toonExample: string;
+  previewType?: 'generative-ui' | 'nodal-ui';
 }
 
 export default function UseCaseDetailPage({
@@ -51,6 +54,7 @@ export default function UseCaseDetailPage({
   llmGuidance,
   jsonExample,
   toonExample,
+  previewType,
 }: UseCaseDetailPageProps) {
   const jsonStats = useMemo(() => ({
     chars: jsonExample.length,
@@ -130,7 +134,7 @@ export default function UseCaseDetailPage({
                   href={standardsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: 'var(--color-brand-primary)' }}
+                  style={{ color: '#E8943A' }}
                 >
                   {standardsBody}
                 </a>
@@ -148,7 +152,7 @@ export default function UseCaseDetailPage({
                 marginBottom: 0,
               }}>
                 <h3 style={{
-                  color: '#95D660',
+                  color: 'var(--color-success)',
                   fontSize: '14px',
                   fontWeight: 500,
                   marginBottom: '16px',
@@ -170,7 +174,7 @@ export default function UseCaseDetailPage({
                       <span style={{
                         position: 'absolute',
                         left: 0,
-                        color: '#95D660'
+                        color: 'var(--color-success)'
                       }}>•</span>
                       {item}
                     </li>
@@ -183,7 +187,7 @@ export default function UseCaseDetailPage({
                 marginBottom: 0,
               }}>
                 <h3 style={{
-                  color: '#FF6B6B',
+                  color: 'var(--color-error)',
                   fontSize: '14px',
                   fontWeight: 500,
                   marginBottom: '16px',
@@ -205,7 +209,7 @@ export default function UseCaseDetailPage({
                       <span style={{
                         position: 'absolute',
                         left: 0,
-                        color: '#FF6B6B'
+                        color: 'var(--color-error)'
                       }}>•</span>
                       {item}
                     </li>
@@ -301,6 +305,51 @@ export default function UseCaseDetailPage({
             </div>
           </section>
 
+          {/* Rendered Preview */}
+          {previewType && (
+            <section style={{ marginBottom: '32px' }}>
+              <h2 style={headingStyle}>Rendered Preview</h2>
+              <p style={{
+                color: 'var(--color-text-secondary)',
+                fontSize: '14px',
+                lineHeight: 1.6,
+                marginBottom: '16px'
+              }}>
+                {previewType === 'generative-ui'
+                  ? 'This is how the JSON example above renders as actual UI components.'
+                  : 'This is how the JSON example above renders as an interactive node graph.'}
+              </p>
+              <div style={{
+                ...sectionStyle,
+                marginBottom: 0,
+                padding: previewType === 'generative-ui' ? '32px' : '0',
+                height: previewType === 'nodal-ui' ? '500px' : 'auto',
+                minHeight: previewType === 'generative-ui' ? '200px' : undefined,
+                overflow: 'hidden',
+                backgroundColor: previewType === 'nodal-ui' ? 'var(--color-bg-base)' : 'var(--color-bg-surface)'
+              }}>
+                {previewType === 'generative-ui' && (
+                  <GenerativeUIPreview
+                    json={JSON.parse(jsonExample)}
+                    style={{ backgroundColor: 'transparent' }}
+                  />
+                )}
+                {previewType === 'nodal-ui' && (
+                  <div style={{ 
+                    height: '100%', 
+                    width: '100%',
+                    backgroundColor: 'var(--color-bg-base)'
+                  }}>
+                    <LiteGraphViewer
+                      json={JSON.parse(jsonExample)}
+                      className="h-full w-full"
+                    />
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* Side-by-side Comparison */}
           <section>
             <h2 style={headingStyle}>Format Comparison</h2>
@@ -360,7 +409,7 @@ export default function UseCaseDetailPage({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span>TOON</span>
                     <span style={{
-                      color: percentChange <= 0 ? '#95D660' : '#FF6B6B',
+                      color: percentChange <= 0 ? 'var(--color-success)' : 'var(--color-error)',
                       fontWeight: 500
                     }}>
                       {percentChange <= 0 ? '' : '+'}{percentChange.toFixed(1)}%

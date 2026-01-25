@@ -2,13 +2,11 @@
 
 import { useState, useEffect, useRef, Suspense, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { HiCode, HiChartBar, HiTemplate, HiCube, HiSearch, HiChevronDown } from 'react-icons/hi';
+import { HiSearch, HiChevronDown } from 'react-icons/hi';
 import Header from '@/components/Header';
 import {
   EXAMPLES,
   Example,
-  ExampleCategory,
-  detectJsonType,
 } from '@/lib/examples';
 import { decode } from '@toon-format/toon';
 
@@ -96,18 +94,11 @@ async function decompressFromBase64url(base64url: string): Promise<string> {
 }
 
 const CodeEditor = dynamic(() => import('@/components/CodeEditor'), { ssr: false });
-const JsonCrackViewer = dynamic(() => import('@/components/JsonCrackViewer'), { ssr: false });
-const GenerativeUIPreview = dynamic(() => import('@/components/GenerativeUIPreview'), { ssr: false });
-const LiteGraphViewer = dynamic(() => import('@/components/LiteGraphViewer'), { ssr: false });
-
-type ViewTab = 'json' | 'visualization' | 'preview';
 
 function AutoonApp() {
   const [toonContent, setToonContent] = useState('');
   const [jsonContent, setJsonContent] = useState<Record<string, unknown> | null>(null);
   const [selectedExample, setSelectedExample] = useState<Example | null>(null);
-  const [activeTab, setActiveTab] = useState<ViewTab>('json');
-  const [detectedType, setDetectedType] = useState<ExampleCategory>('instance');
   const [leftPanelWidth, setLeftPanelWidth] = useState(450);
   const [isDragging, setIsDragging] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,7 +161,6 @@ function AutoonApp() {
     setSelectedExample(example);
     setToonContent(example.toon);
     setJsonContent(example.json);
-    setDetectedType(example.category);
     // Clear URL fragment when loading an example
     window.history.replaceState(null, '', window.location.pathname);
     // Reset flag after state updates
@@ -189,7 +179,6 @@ function AutoonApp() {
           try {
             const parsed = decode(decompressed);
             setJsonContent(parsed as Record<string, unknown>);
-            setDetectedType(detectJsonType(parsed as Record<string, unknown>));
           } catch {
             // If parsing fails, just show the toon content
             setJsonContent(null);
@@ -233,7 +222,6 @@ function AutoonApp() {
       try {
         const parsed = decode(newContent);
         setJsonContent(parsed as Record<string, unknown>);
-        setDetectedType(detectJsonType(parsed as Record<string, unknown>));
       } catch {
         // Keep previous JSON if parsing fails
       }
@@ -247,131 +235,6 @@ function AutoonApp() {
       }, 500);
     }
   }, [isLoadingFromExample, initialized, updateUrlFragment]);
-
-  const renderPreviewContent = () => {
-    if (!jsonContent) {
-      return (
-        <div className="flex items-center justify-center h-full" style={{ color: 'var(--color-text-subtle)' }}>
-          No JSON content to display
-        </div>
-      );
-    }
-
-    switch (activeTab) {
-      case 'json':
-        return (
-          <CodeEditor
-            value={JSON.stringify(jsonContent, null, 2)}
-            readOnly
-            className="h-full"
-            language="json"
-          />
-        );
-
-      case 'visualization':
-        // Show specialized visualizations based on detected type
-        if (detectedType === 'generative-ui') {
-          return (
-            <GenerativeUIPreview
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              json={jsonContent as any}
-              className="h-full"
-              style={{ backgroundColor: 'var(--color-bg-surface)' }}
-            />
-          );
-        }
-        if (detectedType === 'nodal-ui') {
-          return (
-            <LiteGraphViewer
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              json={jsonContent as any}
-              className="h-full"
-            />
-          );
-        }
-        // Default: show JSON tree visualization
-        return <JsonCrackViewer json={JSON.stringify(jsonContent)} className="h-full" />;
-
-      case 'preview':
-        if (detectedType === 'generative-ui') {
-          return (
-            <GenerativeUIPreview
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              json={jsonContent as any}
-              className="h-full"
-              style={{ backgroundColor: 'var(--color-bg-surface)' }}
-            />
-          );
-        }
-        if (detectedType === 'nodal-ui') {
-          return (
-            <LiteGraphViewer
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              json={jsonContent as any}
-              className="h-full"
-            />
-          );
-        }
-        return (
-          <div className="h-full overflow-auto p-4" style={{ backgroundColor: 'var(--color-bg-surface)' }}>
-            <div className="max-w-2xl mx-auto">
-              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-                {detectedType === 'schema' ? 'Schema Structure' : 'Instance Data'}
-              </h3>
-              <pre 
-                className="text-sm rounded-lg p-4 overflow-auto"
-                style={{ 
-                  color: 'var(--color-text-secondary)',
-                  backgroundColor: 'var(--color-bg-elevated)'
-                }}
-              >
-                {JSON.stringify(jsonContent, null, 2)}
-              </pre>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const getTabIcon = (tab: ViewTab) => {
-    switch (tab) {
-      case 'json':
-        return <HiCode className="w-4 h-4" />;
-      case 'visualization':
-        // Show context-specific icon based on detected type
-        if (detectedType === 'nodal-ui') return <HiCube className="w-4 h-4" />;
-        if (detectedType === 'generative-ui') return <HiTemplate className="w-4 h-4" />;
-        return <HiChartBar className="w-4 h-4" />;
-      case 'preview':
-        if (detectedType === 'nodal-ui') return <HiCube className="w-4 h-4" />;
-        return <HiTemplate className="w-4 h-4" />;
-    }
-  };
-
-  const getVisualizationLabel = () => {
-    switch (detectedType) {
-      case 'nodal-ui':
-        return 'Workflow JSON';
-      case 'generative-ui':
-        return 'Generative UI';
-      default:
-        return 'Visualize';
-    }
-  };
-
-  const getPreviewLabel = () => {
-    switch (detectedType) {
-      case 'nodal-ui':
-        return 'Workflow JSON';
-      case 'generative-ui':
-        return 'Generative UI';
-      default:
-        return 'Preview';
-    }
-  };
 
   // Calculate stats for TOON and JSON
   const jsonString = jsonContent ? JSON.stringify(jsonContent, null, 2) : '';
@@ -389,6 +252,47 @@ function AutoonApp() {
     if (jsonStats.chars === 0) return 0;
     return ((toonStats.chars - jsonStats.chars) / jsonStats.chars) * 100;
   }, [toonStats.chars, jsonStats.chars]);
+
+  // Get category label for display
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'schema': return 'Data Validation';
+      case 'instance': return 'Data Representation';
+      case 'generative-ui': return 'Interface Definition';
+      case 'nodal-ui': return 'Workflow Representation';
+      default: return category;
+    }
+  };
+
+  // Get category color styles
+  const getCategoryStyles = (category: string) => {
+    switch (category) {
+      case 'schema':
+        return {
+          backgroundColor: 'rgba(255, 173, 102, 0.1)',
+          border: '1px solid rgba(255, 173, 102, 0.3)',
+          color: '#FFAD66'
+        };
+      case 'instance':
+        return {
+          backgroundColor: 'rgba(213, 255, 128, 0.1)',
+          border: '1px solid rgba(213, 255, 128, 0.3)',
+          color: '#D5FF80'
+        };
+      case 'generative-ui':
+        return {
+          backgroundColor: 'rgba(115, 208, 255, 0.1)',
+          border: '1px solid rgba(115, 208, 255, 0.3)',
+          color: '#73D0FF'
+        };
+      default:
+        return {
+          backgroundColor: 'rgba(212, 191, 255, 0.1)',
+          border: '1px solid rgba(212, 191, 255, 0.3)',
+          color: '#D4BFFF'
+        };
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col dark" data-theme="dark" style={{ backgroundColor: 'var(--color-bg-base)' }}>
@@ -440,9 +344,9 @@ function AutoonApp() {
           onMouseDown={() => setIsDragging(true)}
         />
 
-        {/* Right Panel - Tabbed Views */}
+        {/* Right Panel - JSON */}
         <div className="flex-1 flex flex-col" style={{ backgroundColor: 'var(--color-bg-surface)' }}>
-          {/* Tab Bar */}
+          {/* JSON Stats Bar */}
           <div
             className="flex items-center justify-between"
             style={{
@@ -460,142 +364,121 @@ function AutoonApp() {
               <span>{formatNumber(jsonStats.tokens)} tokens</span>
             </div>
 
-            {/* Interaction UI - on right */}
-            <div className="flex items-center gap-3">
-              {/* Examples selector */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 text-sm font-medium transition-colors"
+            {/* Examples selector - on right */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 text-sm font-medium transition-colors"
+                style={{
+                  color: 'var(--color-text-primary)',
+                  padding: '0.375rem 0'
+                }}
+              >
+                <span>{selectedExample?.name || 'Select an example'}</span>
+                <HiChevronDown
+                  className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                  style={{ color: 'var(--color-text-muted)' }}
+                />
+              </button>
+
+              {isDropdownOpen && (
+                <div
+                  className="absolute top-full right-0 mt-2 w-80 rounded-lg shadow-lg z-50 overflow-hidden"
                   style={{
-                    color: 'var(--color-text-primary)',
-                    padding: '0.375rem 0'
+                    backgroundColor: 'var(--color-bg-elevated)',
+                    border: '1px solid var(--color-border-muted)'
                   }}
                 >
-                  <span>{selectedExample?.name || 'Select an example'}</span>
-                  <HiChevronDown
-                    className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                    style={{ color: 'var(--color-text-muted)' }}
-                  />
-                </button>
-
-                {isDropdownOpen && (
-                  <div
-                    className="absolute top-full right-0 mt-2 w-80 rounded-lg shadow-lg z-50 overflow-hidden"
-                    style={{
-                      backgroundColor: 'var(--color-bg-elevated)',
-                      border: '1px solid var(--color-border-muted)'
-                    }}
-                  >
-                    {/* Search input */}
-                    <div style={{ padding: '12px 12px 8px 12px' }}>
-                      <div
-                        className="flex items-center gap-3 rounded"
-                        style={{
-                          padding: '10px 12px',
-                          backgroundColor: 'var(--color-bg-surface)',
-                          border: '1px solid var(--color-border-default)'
-                        }}
-                      >
-                        <HiSearch className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-subtle)' }} />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search examples..."
-                          autoFocus
-                          className="w-full text-sm outline-none bg-transparent"
-                          style={{ color: 'var(--color-text-primary)' }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Results list */}
-                    <div className="max-h-64 overflow-y-auto" style={{ padding: '4px 0 12px 0' }}>
-                      {filteredExamples.length === 0 ? (
-                        <div style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-subtle)', fontSize: '14px' }}>
-                          No examples found
-                        </div>
-                      ) : (
-                        filteredExamples.map((example) => (
-                          <button
-                            key={example.id}
-                            onClick={() => {
-                              loadExample(example);
-                              setIsDropdownOpen(false);
-                              setSearchQuery('');
-                            }}
-                            className="w-full text-left text-sm transition-colors flex items-center justify-between"
-                            style={{
-                              padding: '10px 16px',
-                              gap: '16px',
-                              backgroundColor: selectedExample?.id === example.id ? 'var(--color-interactive-hover)' : 'transparent',
-                              color: selectedExample?.id === example.id ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)'
-                            }}
-                            onMouseEnter={(e) => {
-                              if (selectedExample?.id !== example.id) {
-                                e.currentTarget.style.backgroundColor = 'var(--color-bg-muted)';
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (selectedExample?.id !== example.id) {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                              }
-                            }}
-                          >
-                            <span className="truncate">{example.name}</span>
-                            <span
-                              className="text-xs font-medium rounded flex-shrink-0"
-                              style={{
-                                padding: '4px 10px',
-                                backgroundColor:
-                                  example.category === 'schema' ? 'rgba(255, 173, 102, 0.1)' :
-                                  example.category === 'instance' ? 'rgba(213, 255, 128, 0.1)' :
-                                  example.category === 'generative-ui' ? 'rgba(115, 208, 255, 0.1)' : 'rgba(212, 191, 255, 0.1)',
-                                border: `1px solid ${
-                                  example.category === 'schema' ? 'rgba(255, 173, 102, 0.3)' :
-                                  example.category === 'instance' ? 'rgba(213, 255, 128, 0.3)' :
-                                  example.category === 'generative-ui' ? 'rgba(115, 208, 255, 0.3)' : 'rgba(212, 191, 255, 0.3)'
-                                }`,
-                                color:
-                                  example.category === 'schema' ? '#FFAD66' :
-                                  example.category === 'instance' ? '#D5FF80' :
-                                  example.category === 'generative-ui' ? '#73D0FF' : '#D4BFFF'
-                              }}
-                            >
-                              {example.category === 'schema' ? 'Data Validation' :
-                               example.category === 'instance' ? 'Data Representation' :
-                               example.category === 'generative-ui' ? 'Interface Definition' : 'Workflow Representation'}
-                            </span>
-                          </button>
-                        ))
-                      )}
+                  {/* Search input */}
+                  <div style={{ padding: '12px 12px 8px 12px' }}>
+                    <div
+                      className="flex items-center gap-3 rounded"
+                      style={{
+                        padding: '10px 12px',
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-default)'
+                      }}
+                    >
+                      <HiSearch className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-subtle)' }} />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search examples..."
+                        autoFocus
+                        className="w-full text-sm outline-none bg-transparent"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      />
                     </div>
                   </div>
-                )}
-              </div>
 
-              <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--color-border-muted)' }} />
-
-              <button
-                onClick={() => setActiveTab('json')}
-                className={`autoon-tab ${activeTab === 'json' ? 'autoon-tab-active' : ''}`}
-              >
-                {getTabIcon('json')}
-                JSON
-              </button>
-              <button
-                onClick={() => setActiveTab('visualization')}
-                className={`autoon-tab ${activeTab === 'visualization' ? 'autoon-tab-active' : ''}`}
-              >
-                {getTabIcon('visualization')}
-                {getVisualizationLabel()}
-              </button>
+                  {/* Results list */}
+                  <div className="max-h-64 overflow-y-auto" style={{ padding: '4px 0 12px 0' }}>
+                    {filteredExamples.length === 0 ? (
+                      <div style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-subtle)', fontSize: '14px' }}>
+                        No examples found
+                      </div>
+                    ) : (
+                      filteredExamples.map((example) => (
+                        <button
+                          key={example.id}
+                          onClick={() => {
+                            loadExample(example);
+                            setIsDropdownOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className="w-full text-left text-sm transition-colors flex items-center justify-between"
+                          style={{
+                            padding: '10px 16px',
+                            gap: '16px',
+                            backgroundColor: selectedExample?.id === example.id ? 'var(--color-interactive-hover)' : 'transparent',
+                            color: selectedExample?.id === example.id ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (selectedExample?.id !== example.id) {
+                              e.currentTarget.style.backgroundColor = 'var(--color-bg-muted)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (selectedExample?.id !== example.id) {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }
+                          }}
+                        >
+                          <span className="truncate">{example.name}</span>
+                          <span
+                            className="text-xs font-medium rounded flex-shrink-0"
+                            style={{
+                              padding: '4px 10px',
+                              ...getCategoryStyles(example.category)
+                            }}
+                          >
+                            {getCategoryLabel(example.category)}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 overflow-hidden">{renderPreviewContent()}</div>
+          {/* JSON Content */}
+          <div className="flex-1 overflow-hidden">
+            {jsonContent ? (
+              <CodeEditor
+                value={JSON.stringify(jsonContent, null, 2)}
+                readOnly
+                className="h-full"
+                language="json"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full" style={{ color: 'var(--color-text-subtle)' }}>
+                No JSON content to display
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>
@@ -606,7 +489,7 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div 
+        <div
           className="h-screen flex items-center justify-center"
           style={{ backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-muted)' }}
         >

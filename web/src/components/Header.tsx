@@ -8,6 +8,7 @@ import { HiExternalLink, HiChevronDown } from 'react-icons/hi';
 const USE_CASES = [
   { id: 'json-schema', name: 'JSON Schema', href: '/json-schema' },
   { id: 'json-instance', name: 'JSON Instance', href: '/json-instance' },
+  { id: 'json-graph', name: 'JSON Graph', href: '/json-graph' },
   { id: 'generative-ui', name: 'Generative UI', href: '/generative-ui' },
   { id: 'nodal-ui', name: 'Nodal UI', href: '/nodal-ui' },
 ];
@@ -29,36 +30,7 @@ export default function Header() {
   return (
     <nav className="autoon-header flex items-center justify-between" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
       <Link href="/" className="flex items-center gap-3">
-        <div className="logo-container w-8 h-8">
-          <div className="logo-glow-ring" />
-          <svg viewBox="0 0 32 32" className="w-8 h-8 logo-svg">
-            <defs>
-              <linearGradient id="headerHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#2D3748"/>
-                <stop offset="100%" stopColor="#1A202C"/>
-              </linearGradient>
-              <linearGradient id="headerStrokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00D4FF"/>
-                <stop offset="50%" stopColor="#7C3AED"/>
-                <stop offset="100%" stopColor="#F472B6"/>
-              </linearGradient>
-              <radialGradient id="headerNodeGrad" cx="30%" cy="30%">
-                <stop offset="0%" stopColor="#FFF"/>
-                <stop offset="50%" stopColor="#FFD700"/>
-                <stop offset="100%" stopColor="#FF8C00"/>
-              </radialGradient>
-            </defs>
-            <polygon
-              points="16,5 25,10 25,22 16,27 7,22 7,10"
-              fill="url(#headerHexGrad)"
-              stroke="url(#headerStrokeGrad)"
-              strokeWidth="1.5"
-            />
-            <circle cx="16" cy="5" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-1"/>
-            <circle cx="25" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-2"/>
-            <circle cx="7" cy="22" r="2" fill="url(#headerNodeGrad)" className="logo-node logo-node-3"/>
-          </svg>
-        </div>
+        <img src="/autoon-logo.svg" alt="Autoon" className="w-8 h-8" style={{ borderRadius: '4px' }} />
         <span className="text-xl font-semibold" style={{ color: 'var(--color-brand-primary)' }}>
           Autoon
         </span>
